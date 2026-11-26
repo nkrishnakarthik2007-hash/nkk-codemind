@@ -8,10 +8,9 @@ import os
 import re
 import sqlite3
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
