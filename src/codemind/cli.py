@@ -10,6 +10,7 @@ from .knowledge.ingest import add_url
 from .knowledge.library import KnowledgeLibrary
 from .providers.ollama import OllamaError, OllamaProvider
 from .providers.openai_compatible import CloudProviderError, OpenAICompatibleProvider
+from .workspace import inspect_workspace, select_relevant_files
 
 
 def _tags(value: str) -> tuple[str, ...]:
@@ -43,10 +44,16 @@ def build_parser() -> argparse.ArgumentParser:
     ask.add_argument("--base-url", help="Hosted provider base URL (default: OpenRouter API)")
     ask.add_argument("--num-ctx", type=int, default=2048, help="Context window budget (default: 2048)")
     ask.add_argument("--num-predict", type=int, default=512, help="Maximum generated tokens (default: 512)")
-    ask.add_argument("--knowledge-limit", type=int, default=3, help="Maximum retrieved documents (default: 3)")
+    ask.add_argument("--knowledge-limit", type=int, default=2, help="Maximum retrieved documents (default: 2)")
+    ask.add_argument("--workspace", type=Path, help="Project folder to inspect and use as bounded code context")
+    ask.add_argument("--max-files", type=int, default=2, help="Maximum relevant project files to include (default: 2)")
+    ask.add_argument("--file-chars", type=int, default=1400, help="Maximum characters per selected file (default: 1400)")
 
     models = sub.add_parser("models", help="List models already installed in local Ollama")
     models.add_argument("--host", help="Ollama URL (default: http://127.0.0.1:11434)")
+
+    inspect = sub.add_parser("inspect", help="Summarize languages, frameworks and files in a project")
+    inspect.add_argument("path", type=Path)
 
     sub.add_parser("list", help="List saved knowledge items")
     return parser
@@ -56,6 +63,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     try:
+        if args.command == "inspect":
+            summary = inspect_workspace(args.path)
+            print(f"Workspace: {summary.root}")
+            print(f"Files indexed: {summary.file_count}")
+            print("Languages: " + (", ".join(summary.languages) or "not detected"))
+            print("Frameworks: " + (", ".join(summary.frameworks) or "not detected"))
+            return 0
         if args.command == "models":
             provider = OllamaProvider(host=args.host)
             installed = provider.list_models()
@@ -89,6 +103,10 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "ask":
             if not 0 <= args.knowledge_limit <= 10:
                 raise ValueError("--knowledge-limit must be between 0 and 10.")
+            if not 1 <= args.max_files <= 10:
+                raise ValueError("--max-files must be between 1 and 10.")
+            if not 200 <= args.file_chars <= 10000:
+                raise ValueError("--file-chars must be between 200 and 10000.")
             matches = library.search(args.prompt, limit=args.knowledge_limit) if args.knowledge_limit else []
             context_parts = []
             if matches:
@@ -110,6 +128,24 @@ def main(argv: list[str] | None = None) -> int:
             )
             if context_parts:
                 system += "\n\nRelevant reference material:\n" + "\n\n".join(context_parts)
+            if args.workspace:
+                summary = inspect_workspace(args.workspace)
+                selected = select_relevant_files(
+                    args.workspace, args.prompt, max_files=args.max_files,
+                    max_chars_per_file=args.file_chars,
+                )
+                system += (
+                    f"\n\nProject workspace: {summary.root}\n"
+                    f"Detected languages: {", ".join(summary.languages)}\n"
+                    f"Detected frameworks: {", ".join(summary.frameworks)}"
+                )
+                if selected:
+                    system += "\n\nRelevant project files (read-only context):\n" + "\n\n".join(
+                        f"[File: {item.path}]\n{item.content}" for item in selected
+                    )
+                    print(f"Using {len(selected)} project file(s) as context.", file=sys.stderr)
+                else:
+                    print("No relevant project files found for this request.", file=sys.stderr)
 
             if args.provider == "openai-compatible":
                 provider = OpenAICompatibleProvider(base_url=args.base_url)
