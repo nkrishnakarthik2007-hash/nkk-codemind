@@ -18,6 +18,9 @@ TEXT_EXTENSIONS = {
     ".rs", ".go", ".java", ".cs", ".c", ".h", ".cpp", ".hpp",
     ".sql", ".yaml", ".yml", ".sh", ".ps1",
 }
+SECRET_FILE_NAMES = {".env", ".env.local", ".env.production", ".npmrc", ".pypirc", "credentials.json", "secrets.json", "id_rsa", "id_ed25519"}
+SECRET_PATTERN = re.compile(r'(?i)(api[_-]?key|secret|password|access[_-]?token|refresh[_-]?token)(\s*[:=]\s*)(["\']?)[^"\'\s,;]{6,}')
+
 LANGUAGE_BY_EXTENSION = {
     ".py": "Python", ".pyi": "Python", ".js": "JavaScript", ".jsx": "JavaScript",
     ".mjs": "JavaScript", ".cjs": "JavaScript", ".ts": "TypeScript",
@@ -57,6 +60,14 @@ def _walk_files(root: Path, max_files: int = 3000):
         directories[:] = sorted(name for name in directories if name not in IGNORED_DIRS)
         for filename in sorted(filenames):
             path = Path(current) / filename
+            if filename.lower() in SECRET_FILE_NAMES or filename.lower().startswith(".env."):
+                continue
+            if path.is_symlink():
+                continue
+            try:
+                path.resolve().relative_to(root.resolve())
+            except (OSError, ValueError):
+                continue
             if path.suffix.lower() not in TEXT_EXTENSIONS and filename not in {
                 "Dockerfile", "Makefile", "requirements.txt",
             }:
@@ -139,7 +150,8 @@ def select_relevant_files(
         if file_path.name.lower() in {"readme.md", "pyproject.toml", "package.json", "requirements.txt"}:
             score += 1
         if score:
-            candidates.append(SelectedFile(relative, text[:max_chars_per_file], score))
+            safe_text = SECRET_PATTERN.sub(r"\1\2[REDACTED]", text)
+            candidates.append(SelectedFile(relative, safe_text[:max_chars_per_file], score))
 
     candidates.sort(key=lambda item: (-item.score, item.path))
     return candidates[:max(1, min(max_files, 10))]
