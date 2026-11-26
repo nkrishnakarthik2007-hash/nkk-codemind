@@ -35,3 +35,17 @@ def test_select_relevant_files_ignores_dependency_folders(tmp_path):
 
     assert len(selected) == 1
     assert selected[0].path == "src/login.py"
+
+
+def test_workspace_context_skips_secret_files_and_redacts_tokens(tmp_path):
+    (tmp_path / ".env").write_text("API_KEY=do-not-send-this-secret", encoding="utf-8")
+    (tmp_path / "settings.py").write_text(
+        'API_KEY = "do-not-send-this-secret"\\nprint("hello")', encoding="utf-8"
+    )
+
+    selected = select_relevant_files(tmp_path, "API_KEY settings")
+
+    assert all(item.path != ".env" for item in selected)
+    assert selected
+    assert "do-not-send-this-secret" not in selected[0].content
+    assert "[REDACTED]" in selected[0].content
