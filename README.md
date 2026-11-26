@@ -20,7 +20,7 @@ It aims to make useful AI-assisted software development available on CPU-only co
 
 ## Status
 
-Early research and prototype stage. This repository does **not** yet claim to be a complete autonomous coding agent.
+Early prototype. The current CLI can store/search knowledge and query an installed local Ollama model with a few relevant knowledge excerpts. It is **not yet** a full autonomous coding agent or Windows desktop application.
 
 See:
 - [VISION.md](VISION.md) — product principles and boundaries
@@ -28,44 +28,65 @@ See:
 - [ROADMAP.md](ROADMAP.md) — staged implementation plan
 - [MODEL_RESEARCH.md](MODEL_RESEARCH.md) — model and runtime evaluation plan
 - [SECURITY.md](SECURITY.md) — safety and privacy principles
+- [docs/LOCAL_MODEL_SETUP.md](docs/LOCAL_MODEL_SETUP.md) — Windows setup instructions
 
-## Prototype: knowledge library
+## Quick start on Windows
 
-The first prototype is deliberately small and does not require an AI model. It demonstrates the key idea: add documents or URLs to a persistent library, search them on demand, and retrieve only relevant excerpts.
-
-### Requirements
-
+Requirements:
 - Python 3.10+
-- Optional internet access for URL ingestion
+- [Ollama for Windows](https://ollama.com/) for local inference (optional for knowledge-only commands)
 
-### Run on Windows
+Create an environment and install:
 
 ```powershell
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -e .
-python -m codemind --help
+python -m pip install -e ".[dev]"
+```
+
+Install one small candidate model:
+
+```powershell
+ollama pull qwen2.5-coder:1.5b
+```
+
+List local models:
+
+```powershell
+python -m codemind models
 ```
 
 Add a local document:
 
 ```powershell
-python -m codemind add-file .\docs\python-guide.md --tags python,docs
+python -m codemind add-file .\python-notes.md --tags python,docs
 ```
 
-Add a web page:
+Add public documentation:
 
 ```powershell
 python -m codemind add-url https://docs.python.org/3/tutorial/ --tags python,official
 ```
 
-Search the knowledge library:
+Ask the local model. CodeMind retrieves a small number of relevant saved excerpts and sends them with the question:
 
 ```powershell
-python -m codemind search "read a JSON file in Python"
+python -m codemind ask "How do I read JSON from a file in Python?" --model qwen2.5-coder:1.5b
 ```
 
-The prototype stores data under the user profile by default, not inside the project directory. Set `CODEMIND_HOME` to change that location.
+Search the knowledge library without starting a model:
+
+```powershell
+python -m codemind search "read JSON file"
+```
+
+The default Ollama request uses a 2048-token context budget, a 512-token output limit and `keep_alive=0` so the model is asked to unload after the task. Adjust limits for your hardware:
+
+```powershell
+python -m codemind ask "Explain this function" --model qwen2.5-coder:1.5b --num-ctx 1024 --num-predict 256
+```
+
+Knowledge is stored under `%USERPROFILE%\.codemind` by default. Set `CODEMIND_HOME` to choose another directory.
 
 ## Design constraints
 
