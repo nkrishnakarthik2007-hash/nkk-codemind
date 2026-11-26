@@ -97,6 +97,7 @@ def record_event(event: str, **data: Any) -> None:
         str(key)[:60]: redact_text(str(value))[:200]
         for key, value in data.items()
         if key.lower() not in {"prompt", "output", "content", "source", "code", "path"}
+        and not any(marker in key.lower() for marker in ("key", "token", "password", "secret", "auth", "credential"))
     }
     logging.getLogger(LOGGER_NAME).info(
         redact_text(event)[:120], extra={"event_data": safe_data}
