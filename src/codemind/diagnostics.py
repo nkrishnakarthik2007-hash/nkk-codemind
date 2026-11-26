@@ -163,6 +163,7 @@ def upload_support_bundle(
     api_root = "https://api.github.com"
     headers = {
         "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json",
         "Authorization": f"Bearer {credential}",
         "X-GitHub-Api-Version": "2022-11-28",
         "User-Agent": "NKK-CodeMind",
