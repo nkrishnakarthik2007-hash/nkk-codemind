@@ -100,7 +100,7 @@ The default hosted endpoint is OpenRouter. To use another compatible service, pr
 python -m codemind ask "Explain this code" --provider openai-compatible --base-url https://api.groq.com/openai/v1 --model "your-model-id"
 ```
 
-Provider model IDs, free-tier availability and quotas depend on the provider. Sending a prompt to a hosted provider sends that prompt and retrieved excerpts off your computer. Use this only when you have chosen a provider and are comfortable with its data policy.
+Provider model IDs, free-tier availability and quotas depend on the provider. Sending a prompt to a hosted provider sends that prompt, retrieved excerpts and selected workspace snippets off your computer. Use this only when you have chosen a provider and are comfortable with its data policy.
 
 Search the knowledge library without starting a model:
 
