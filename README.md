@@ -29,6 +29,7 @@ See:
 - [MODEL_RESEARCH.md](MODEL_RESEARCH.md) — model and runtime evaluation plan
 - [SECURITY.md](SECURITY.md) — safety and privacy principles
 - [docs/LOCAL_MODEL_SETUP.md](docs/LOCAL_MODEL_SETUP.md) — Windows setup instructions
+- [docs/CLOUD_PROVIDER_SETUP.md](docs/CLOUD_PROVIDER_SETUP.md) — optional hosted inference
 
 ## Quick start on Windows
 
@@ -73,6 +74,21 @@ Ask the local model. CodeMind retrieves a small number of relevant saved excerpt
 ```powershell
 python -m codemind ask "How do I read JSON from a file in Python?" --model qwen2.5-coder:1.5b
 ```
+
+Hosted inference is also available through an OpenAI-compatible API. It is **never selected automatically** in this prototype. Set your provider key in the current PowerShell session and explicitly choose the provider:
+
+```powershell
+$env:CODEMIND_API_KEY = "your-provider-key"
+python -m codemind ask "Review this Python function" --provider openai-compatible --model "provider/model-name"
+```
+
+The default hosted endpoint is OpenRouter. To use another compatible service, provide its HTTPS base URL:
+
+```powershell
+python -m codemind ask "Explain this code" --provider openai-compatible --base-url https://api.groq.com/openai/v1 --model "your-model-id"
+```
+
+Provider model IDs, free-tier availability and quotas depend on the provider. Sending a prompt to a hosted provider sends that prompt and retrieved excerpts off your computer. Use this only when you have chosen a provider and are comfortable with its data policy.
 
 Search the knowledge library without starting a model:
 
