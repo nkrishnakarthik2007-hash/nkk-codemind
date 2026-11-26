@@ -27,6 +27,7 @@ See:
 - [ARCHITECTURE.md](ARCHITECTURE.md) — proposed technical design
 - [docs/CODEMIND_BLUEPRINT.md](docs/CODEMIND_BLUEPRINT.md) — full product blueprint for the autonomous coding workspace
 - [docs/OPEN_SOURCE_RESEARCH.md](docs/OPEN_SOURCE_RESEARCH.md) — project comparison, failure lessons, licensing register, and OpenCode SDK architecture decision
+- [docs/SHARED_DESKTOP_UX_REQUIREMENTS.md](docs/SHARED_DESKTOP_UX_REQUIREMENTS.md) — shared NKK desktop update, startup logging, diagnostics and APK icon requirements
 - [agent-host/README.md](agent-host/README.md) — first read-only OpenCode SDK integration prototype
 - [ROADMAP.md](ROADMAP.md) — staged implementation plan
 - [MODEL_RESEARCH.md](MODEL_RESEARCH.md) — model and runtime evaluation plan
