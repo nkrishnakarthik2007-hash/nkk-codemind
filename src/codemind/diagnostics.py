@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import platform
 import re
-import sys
 import zipfile
 from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
@@ -76,6 +74,10 @@ def configure_logging(home: Path | None = None) -> Path:
     logger.propagate = False
 
     target = str(log_path.resolve())
+    for existing in list(logger.handlers):
+        if isinstance(existing, RotatingFileHandler) and str(Path(existing.baseFilename).resolve()) != target:
+            logger.removeHandler(existing)
+            existing.close()
     if not any(
         isinstance(handler, RotatingFileHandler)
         and str(Path(handler.baseFilename).resolve()) == target
