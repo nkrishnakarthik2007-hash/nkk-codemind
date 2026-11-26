@@ -1,0 +1,1 @@
+"""Persistent, on-demand knowledge storage and retrieval."""
