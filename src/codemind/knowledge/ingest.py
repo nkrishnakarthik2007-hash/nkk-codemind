@@ -12,9 +12,16 @@ import socket
 from html.parser import HTMLParser
 from urllib.error import URLError
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from .library import KnowledgeItem, KnowledgeLibrary
+
+
+class _NoRedirectHandler(HTTPRedirectHandler):
+    """Do not follow redirects during prototype URL ingestion."""
+
+    def redirect_request(self, request, response, code, message, headers, new_url):
+        return None
 
 
 class _TextExtractor(HTMLParser):
@@ -47,7 +54,14 @@ def _validate_public_url(url: str) -> None:
     parsed = urlparse(url)
     if parsed.scheme != "https" or not parsed.hostname:
         raise ValueError("Only HTTPS URLs are accepted.")
-    host = parsed.hostname.lower()
+    if parsed.username or parsed.password:
+        raise ValueError("URLs containing embedded credentials are not allowed.")
+    try:
+        if parsed.port not in (None, 443):
+            raise ValueError("Only the standard HTTPS port is allowed.")
+    except ValueError as exc:
+        raise ValueError("Invalid URL port.") from exc
+    host = parsed.hostname.lower().rstrip(".")
     if host in {"localhost", "localhost.localdomain"} or host.endswith(".local"):
         raise ValueError("Local destinations are not allowed.")
     try:
@@ -63,8 +77,9 @@ def _validate_public_url(url: str) -> None:
 def add_url(library: KnowledgeLibrary, url: str, *, tags: tuple[str, ...] = ()) -> KnowledgeItem:
     _validate_public_url(url)
     request = Request(url, headers={"User-Agent": "NKK-CodeMind/0.1 (+documentation research)"})
+    opener = build_opener(_NoRedirectHandler())
     try:
-        with urlopen(request, timeout=12) as response:
+        with opener.open(request, timeout=12) as response:
             final_url = response.geturl()
             _validate_public_url(final_url)
             content_type = response.headers.get("Content-Type", "").lower()
