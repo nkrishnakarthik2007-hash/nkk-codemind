@@ -11,6 +11,7 @@ from pathlib import Path
 IGNORED_DIRS = {
     ".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache",
     ".mypy_cache", ".ruff_cache", "dist", "build", "target", ".next", ".turbo",
+    ".ssh", ".aws", ".azure", ".gnupg", ".kube",
 }
 TEXT_EXTENSIONS = {
     ".py", ".pyi", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs",
@@ -93,7 +94,7 @@ def inspect_workspace(path: Path) -> WorkspaceSummary:
     languages = {LANGUAGE_BY_EXTENSION[item.suffix.lower()] for item, _ in entries if item.suffix.lower() in LANGUAGE_BY_EXTENSION}
     frameworks: set[str] = set()
     package_json = root / "package.json"
-    if package_json.is_file():
+    if package_json.is_file() and not package_json.is_symlink():
         languages.update({"JavaScript"})
         try:
             package = json.loads(package_json.read_text(encoding="utf-8"))
