@@ -2,8 +2,10 @@
 
 ## Milestone 0 — Research and reproducible baseline
 
-- [ ] Inspect existing open-source coding agents and identify reusable components.
-- [ ] Record licences and attribution requirements.
+- [x] Inspect leading open-source coding agents and identify reusable capabilities.
+- [x] Record preliminary licences, attribution requirements, and maintenance risks.
+- [x] Select OpenCode SDK integration as the first agent-runtime direction.
+- [x] Select Monaco + custom NKK workbench for the initial editor direction.
 - [ ] Select candidate small coding and instruction models.
 - [ ] Benchmark quantized CPU inference on 8 GB and 16 GB machines.
 - [ ] Define a small, repeatable coding evaluation set.

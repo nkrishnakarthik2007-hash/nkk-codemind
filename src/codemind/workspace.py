@@ -114,7 +114,7 @@ def inspect_workspace(path: Path) -> WorkspaceSummary:
         languages.add("Go")
 
     files = tuple(
-        WorkspaceFile(str(item.relative_to(root)), LANGUAGE_BY_EXTENSION.get(item.suffix.lower(), "Text"), size)
+        WorkspaceFile(item.relative_to(root).as_posix(), LANGUAGE_BY_EXTENSION.get(item.suffix.lower(), "Text"), size)
         for item, size in entries
     )
     return WorkspaceSummary(
@@ -140,7 +140,7 @@ def select_relevant_files(
     candidates: list[SelectedFile] = []
 
     for file_path, _size in _walk_files(root):
-        relative = str(file_path.relative_to(root))
+        relative = file_path.relative_to(root).as_posix()
         try:
             text = file_path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
