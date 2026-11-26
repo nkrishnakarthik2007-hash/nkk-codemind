@@ -61,15 +61,26 @@
 - [ ] Run verification and repair loop with limits.
 - [ ] Persist concise project state and decisions.
 
-## Milestone 6 — Windows desktop application
+## Milestone 6 — Diagnostics and remote development loop
+
+- [ ] Structured rotating logs with correlation IDs.
+- [ ] Secret redaction and privacy-safe diagnostic bundles.
+- [ ] Secure GitHub authentication using OS credential storage.
+- [ ] Upload diagnostics to a separate private repository and create/update issues.
+- [ ] GitHub-assisted branch, patch, test and pull-request workflow.
+- [ ] Require passing CI before release publication.
+
+## Milestone 7 — Windows desktop application
 
 - [ ] Tauri shell and React interface.
 - [ ] Project picker, chat, knowledge library and diff view.
 - [ ] Model/provider settings.
 - [ ] Resource monitor and local model manager.
-- [ ] Windows packaging, installer and update strategy.
+- [ ] Windows packaging, installer and Velopack/GitHub Releases update strategy.
+- [ ] Automatic update check, staged install, restart and rollback.
+- [ ] Verify persistent data survives upgrade, rollback and uninstall.
 
-## Milestone 7 — Evaluation and release
+## Milestone 8 — Evaluation and release
 
 - [ ] Benchmark 8 GB CPU-only device.
 - [ ] Benchmark 16 GB CPU-only device.
