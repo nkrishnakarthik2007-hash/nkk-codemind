@@ -324,3 +324,8 @@ Review each project's current license and dependencies before reusing code. Pref
 **Token policy:** deterministic tools and local retrieval first; small local models for classification, summarization and context preparation; stronger local models for coding; cloud escalation only when explicitly enabled and a capability gap exists. Optimize cost per verified task, not raw token count. Avoid parallel agents by default on low-RAM PCs.
 
 The detailed capability comparison, failure lessons, license register, and implementation sequence are in [OPEN_SOURCE_RESEARCH.md](OPEN_SOURCE_RESEARCH.md).
+
+
+## Shared NKK desktop experience requirements
+
+The product-wide release notification, persistent diagnostics, no-black-startup, and update-safe user-data requirements are defined in [SHARED_DESKTOP_UX_REQUIREMENTS.md](SHARED_DESKTOP_UX_REQUIREMENTS.md). These are future desktop-shell requirements for CodeMind; the current CLI does not yet have an updater or desktop UI.
