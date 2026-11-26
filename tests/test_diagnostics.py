@@ -1,6 +1,8 @@
 import json
 import zipfile
 
+import pytest
+
 from codemind.diagnostics import (
     configure_logging,
     create_support_bundle,
@@ -62,15 +64,12 @@ def test_upload_requires_a_token(tmp_path, monkeypatch):
     bundle.write_bytes(b"diagnostic-data")
     monkeypatch.delenv("CODEMIND_GITHUB_TOKEN", raising=False)
 
-    import pytest
-
     with pytest.raises(ValueError, match="CODEMIND_GITHUB_TOKEN"):
         upload_support_bundle(bundle, "owner/private-diagnostics")
 
 
 def test_upload_refuses_public_repositories(tmp_path, monkeypatch):
     import json
-    import pytest
 
     from codemind.diagnostics import upload_support_bundle
 
