@@ -309,3 +309,18 @@ A feature is complete only when:
 - ripgrep — fast repository search.
 
 Review each project's current license and dependencies before reusing code. Prefer clean-room implementation or clearly attributed compatible components.
+
+
+## 11. Architecture decision — OpenCode-powered NKK product
+
+**Decision:** Use the OpenCode SDK as the first coding-agent runtime behind a CodeMind-owned adapter. Do not fork and rebrand the OpenCode desktop application. CodeMind owns the NKK desktop experience, project memory, task planning, token economy, GitHub workflows, safety policy, diagnostics, and updates. OpenCode supplies the first agent session/tool runtime and broad model-provider integration.
+
+**Desktop/editor direction:** Tauri + React + TypeScript with Monaco embedded in a custom NKK workbench. Monaco is an editor component, not a complete IDE; language servers, terminal, debugging, file explorer, diff review, and other workbench services remain separate modules. Do not take on a full Code-OSS fork for the MVP.
+
+**Runtime boundary:** Host a pinned OpenCode SDK in a managed local sidecar or in-process service. Keep the existing Python knowledge/indexing engine initially and connect it through a narrow local interface/custom tools. Do not expose an unauthenticated agent server to the network. Prefer in-process hosting or authenticated local IPC; if loopback HTTP is needed, bind only to localhost, use a per-launch secret, validate origins, and shut down cleanly.
+
+**CodeMind policy must be stricter than generic agent defaults:** deny push, merge, release, destructive commands, and secret-file reads by default; require approval for shell, installs, network transfers, and external workspace access; scope writes to the selected workspace; preserve Git checkpoints; bound steps/retries/output/time; and verify every result with actual test output. Model-generated text must never grant its own permissions.
+
+**Token policy:** deterministic tools and local retrieval first; small local models for classification, summarization and context preparation; stronger local models for coding; cloud escalation only when explicitly enabled and a capability gap exists. Optimize cost per verified task, not raw token count. Avoid parallel agents by default on low-RAM PCs.
+
+The detailed capability comparison, failure lessons, license register, and implementation sequence are in [OPEN_SOURCE_RESEARCH.md](OPEN_SOURCE_RESEARCH.md).
