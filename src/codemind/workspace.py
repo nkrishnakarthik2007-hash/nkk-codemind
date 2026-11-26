@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -52,7 +53,7 @@ class SelectedFile:
 
 def _walk_files(root: Path, max_files: int = 3000):
     count = 0
-    for current, directories, filenames in __import__("os").walk(root):
+    for current, directories, filenames in os.walk(root):
         directories[:] = sorted(name for name in directories if name not in IGNORED_DIRS)
         for filename in sorted(filenames):
             path = Path(current) / filename
