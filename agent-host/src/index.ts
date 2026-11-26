@@ -49,18 +49,24 @@ async function resolveWorkspace(value: unknown): Promise<string> {
 const host = await OpenCode.create({
   database: { path: resolve(dataRoot, "sessions.db") },
   config: {
-    default_agent: "plan",
-    permissions: [
-      { action: "shell", resource: "*", effect: "deny" },
-      { action: "edit", resource: "*", effect: "deny" },
-      { action: "read", resource: "*.env", effect: "deny" },
-      { action: "read", resource: "*.env.*", effect: "deny" },
-      { action: "external_directory", resource: "*", effect: "deny" },
-      { action: "webfetch", resource: "*", effect: "deny" },
-      { action: "websearch", resource: "*", effect: "deny" },
-      { action: "execute", resource: "*", effect: "deny" }
-    ]
+    directory: dataRoot,
+    project: false,
+    content: JSON.stringify({
+      default_agent: "plan",
+      permissions: [
+        { action: "shell", resource: "*", effect: "deny" },
+        { action: "edit", resource: "*", effect: "deny" },
+        { action: "read", resource: "*.env", effect: "deny" },
+        { action: "read", resource: "*.env.*", effect: "deny" },
+        { action: "external_directory", resource: "*", effect: "deny" },
+        { action: "webfetch", resource: "*", effect: "deny" },
+        { action: "websearch", resource: "*", effect: "deny" },
+        { action: "execute", resource: "*", effect: "deny" }
+      ]
+    })
   },
+  models: { fetch: false },
+  fs: { filewatcher: false },
   log: {
     level: "warn",
     emit: (entry) => {
