@@ -4,15 +4,15 @@ This document defines the intended DroidBox-style workflow for CodeMind. It is a
 
 ## Current state
 
-CodeMind is currently a Python CLI prototype. It can inspect a workspace, select bounded source context, retrieve saved knowledge, and call local Ollama or an explicitly selected OpenAI-compatible provider.
+CodeMind is currently a Python CLI prototype. It can inspect a workspace, select bounded source context, retrieve saved knowledge, call local Ollama or an explicitly selected OpenAI-compatible provider, and write local rotating JSONL diagnostics. `codemind diagnostics --output codemind-support.zip` exports a support bundle containing the app manifest and rotated logs.
 
-It does not yet have a desktop shell, automatic remote log upload, a GitHub-connected coding agent, or an installed-app updater.
+The local diagnostics foundation is implemented. It does not yet have automatic remote log upload, a GitHub-connected coding agent, a desktop shell, or an installed-app updater.
 
 ## Target workflow
 
-1. CodeMind writes structured, rotating diagnostic logs locally.
-2. On an error, the app captures the relevant log tail, environment summary, app version and a diagnostic correlation ID.
-3. Before upload, it redacts likely credentials and excludes source files, personal files, APKs, environment files and user project data.
+1. **Implemented:** CodeMind writes structured, rotating JSONL diagnostic logs locally under `%USERPROFILE%\\.codemind\\logs` (or `$CODEMIND_HOME\\logs`).
+2. **Partially implemented:** the CLI records command start/failure metadata and can export a support ZIP. Automatic error snapshots, environment summary and correlation IDs remain future work.
+3. **Local baseline implemented:** common credential patterns are redacted and sensitive metadata keys are excluded. The support ZIP includes only the diagnostics log files and a small manifest; it does not collect project files, prompts or model output.
 4. The app uploads a bounded diagnostic report to a **separate private GitHub diagnostics repository** and creates/updates an issue. Never upload raw logs to this public source repository.
 5. The coding assistant can retrieve the report through the connected GitHub integration, investigate the failure, edit the CodeMind source repository, and run CI.
 6. A release is published only after tests/build checks pass.
@@ -76,7 +76,7 @@ A commit is a source-code change, not automatically a safe app release. Every ch
 
 ## Implementation order
 
-1. Add structured rotating diagnostics and redaction to the current Python engine.
+1. **Done (initial foundation):** add structured rotating diagnostics, common-secret redaction, and a local support ZIP export to the Python engine.
 2. Add private GitHub diagnostics upload and issue creation with scoped authentication.
 3. Add a GitHub-assisted development workflow and branch/PR/CI checks.
 4. Build the Windows desktop shell and secure settings/credential storage.
