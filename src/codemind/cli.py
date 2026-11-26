@@ -150,6 +150,11 @@ def main(argv: list[str] | None = None) -> int:
                     print("No relevant project files found for this request.", file=sys.stderr)
 
             if args.provider == "openai-compatible":
+                print(
+                    "Hosted provider selected: your prompt, retrieved references and selected workspace snippets "
+                    "will be sent to the configured service.",
+                    file=sys.stderr,
+                )
                 provider = OpenAICompatibleProvider(base_url=args.base_url)
             else:
                 provider = OllamaProvider(host=args.host)
