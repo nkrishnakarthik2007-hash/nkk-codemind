@@ -9,6 +9,7 @@ from pathlib import Path
 from .knowledge.ingest import add_url
 from .knowledge.library import KnowledgeLibrary
 from .providers.ollama import OllamaError, OllamaProvider
+from .providers.openai_compatible import CloudProviderError, OpenAICompatibleProvider
 
 
 def _tags(value: str) -> tuple[str, ...]:
@@ -37,7 +38,9 @@ def build_parser() -> argparse.ArgumentParser:
     ask = sub.add_parser("ask", help="Ask a local Ollama model, using relevant saved knowledge")
     ask.add_argument("prompt")
     ask.add_argument("--model", required=True, help="Installed Ollama model name")
+    ask.add_argument("--provider", choices=("ollama", "openai-compatible"), default="ollama", help="Local Ollama by default; hosted inference requires explicit selection")
     ask.add_argument("--host", help="Ollama URL (default: http://127.0.0.1:11434)")
+    ask.add_argument("--base-url", help="Hosted provider base URL (default: OpenRouter API)")
     ask.add_argument("--num-ctx", type=int, default=2048, help="Context window budget (default: 2048)")
     ask.add_argument("--num-predict", type=int, default=512, help="Maximum generated tokens (default: 512)")
     ask.add_argument("--knowledge-limit", type=int, default=3, help="Maximum retrieved documents (default: 3)")
@@ -108,14 +111,17 @@ def main(argv: list[str] | None = None) -> int:
             if context_parts:
                 system += "\n\nRelevant reference material:\n" + "\n\n".join(context_parts)
 
-            provider = OllamaProvider(host=args.host)
+            if args.provider == "openai-compatible":
+                provider = OpenAICompatibleProvider(base_url=args.base_url)
+            else:
+                provider = OllamaProvider(host=args.host)
             result = provider.generate(
                 args.model,
                 args.prompt,
                 system=system,
                 num_ctx=args.num_ctx,
                 num_predict=args.num_predict,
-                keep_alive=0,
+                **({"keep_alive": 0} if args.provider == "ollama" else {}),
             )
             print(result.text)
             stats = []
@@ -134,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
             for item in items:
                 print(f"{item.title} | {item.source_type} | {item.item_id}")
         return 0
-    except (OSError, ValueError, OllamaError) as exc:
+    except (OSError, ValueError, OllamaError, CloudProviderError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 2
 
