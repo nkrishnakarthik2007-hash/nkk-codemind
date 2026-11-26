@@ -20,6 +20,9 @@ Last reviewed: 2026-11-27
 - PR #2, `Define shared NKK desktop update and diagnostics experience`, is also a draft and is based on PR #1.
 - Both PR branches have passing test workflows. Neither is a desktop release.
 
+## Feedback and support
+- No in-app feedback form exists in this CLI prototype. Use the repository's GitHub Issues for early bug reports and feature suggestions; do not attach prompts, private code or credentials.
+
 ## Next engineering step
 1. Implement a permission-controlled workspace tool layer for read, edit, test and command execution.
 2. Require explicit approval for writes, installs, destructive actions, network-sensitive actions and commands outside the selected workspace.
