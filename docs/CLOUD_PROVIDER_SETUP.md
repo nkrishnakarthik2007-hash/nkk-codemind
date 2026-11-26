@@ -36,7 +36,7 @@ The adapter uses the standard `/chat/completions` endpoint. Compatibility varies
 
 ## Privacy
 
-Selecting `--provider openai-compatible` sends the task prompt and any retrieved knowledge excerpts to the configured provider. Do not use hosted inference for confidential code unless you have checked the provider's data handling terms and have permission to share that code.
+Selecting `--provider openai-compatible` sends the task prompt, retrieved knowledge excerpts and selected workspace code snippets to the configured provider. Do not use hosted inference for confidential code unless you have checked the provider's data handling terms and have permission to share that code.
 
 Hosted endpoints must use HTTPS. API keys are sent in the Authorization header and are never written to the CodeMind knowledge database.
 
