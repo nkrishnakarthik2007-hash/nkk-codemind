@@ -35,11 +35,12 @@
 
 ## Milestone 3 — Provider routing
 
-- [ ] Define a common provider protocol.
+- [x] Define a common provider protocol.
 - [ ] Add a llama.cpp adapter or evaluate Ollama's underlying runtime first.
-- [ ] Add one optional hosted provider adapter.
+- [x] Add one optional OpenAI-compatible hosted provider adapter.
 - [ ] Implement model selection and fallback based on task, capability, latency, privacy and quota.
 - [ ] Support streaming and cancellation.
+- [x] Require explicit hosted-provider selection and HTTPS endpoints.
 - [ ] Keep secrets outside repository and logs.
 
 ## Milestone 4 — Coding workspace engine
