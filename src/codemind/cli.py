@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .diagnostics import configure_logging, create_support_bundle, record_event
 from .knowledge.ingest import add_url
 from .knowledge.library import KnowledgeLibrary
 from .providers.ollama import OllamaError, OllamaProvider
@@ -56,13 +57,24 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("path", type=Path)
 
     sub.add_parser("list", help="List saved knowledge items")
+
+    diagnostics = sub.add_parser("diagnostics", help="Export a privacy-safe support bundle")
+    diagnostics.add_argument("--output", type=Path, default=Path("codemind-support.zip"))
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    configure_logging()
+    record_event("command_started", command=args.command)
 
     try:
+        if args.command == "diagnostics":
+            bundle = create_support_bundle(args.output)
+            print(f"Support bundle created: {bundle}")
+            print("Review the ZIP before sharing it. It contains operational logs, not project files.")
+            record_event("diagnostics_bundle_created")
+            return 0
         if args.command == "inspect":
             summary = inspect_workspace(args.path)
             print(f"Workspace: {summary.root}")
@@ -184,6 +196,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{item.title} | {item.source_type} | {item.item_id}")
         return 0
     except (OSError, ValueError, OllamaError, CloudProviderError) as exc:
+        record_event("command_failed", command=args.command, error_type=type(exc).__name__)
         print(f"Error: {exc}", file=sys.stderr)
         return 2
 
