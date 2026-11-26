@@ -45,8 +45,8 @@
 
 ## Milestone 4 — Coding workspace engine
 
-- [ ] Project file inventory and language detection.
-- [ ] Relevant file selection and bounded context assembly.
+- [x] Project file inventory and basic language/framework detection.
+- [x] Relevant file selection and bounded read-only context assembly.
 - [ ] Safe patch-based editing.
 - [ ] Git diff and rollback-friendly workflow.
 - [ ] Tool permission policy.
