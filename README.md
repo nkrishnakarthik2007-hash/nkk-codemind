@@ -20,7 +20,7 @@ It aims to make useful AI-assisted software development available on CPU-only co
 
 ## Status
 
-Early prototype. The current CLI can store/search knowledge and query an installed local Ollama model with a few relevant knowledge excerpts. It is **not yet** a full autonomous coding agent or Windows desktop application.
+Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, and now writes local rotating diagnostics with a privacy-safe support-bundle export. It is **not yet** a full autonomous coding agent, remote GitHub diagnostics uploader, or Windows desktop application.
 
 See:
 - [VISION.md](VISION.md) — product principles and boundaries
@@ -30,7 +30,7 @@ See:
 - [SECURITY.md](SECURITY.md) — safety and privacy principles
 - [docs/LOCAL_MODEL_SETUP.md](docs/LOCAL_MODEL_SETUP.md) — Windows setup instructions
 - [docs/CLOUD_PROVIDER_SETUP.md](docs/CLOUD_PROVIDER_SETUP.md) — optional hosted inference
-- [docs/AUTOMATIC_DEVELOPMENT_LOOP.md](docs/AUTOMATIC_DEVELOPMENT_LOOP.md) — planned diagnostics, GitHub development and automatic updates
+- [docs/AUTOMATIC_DEVELOPMENT_LOOP.md](docs/AUTOMATIC_DEVELOPMENT_LOOP.md) — diagnostics, GitHub development and automatic updates
 
 ## Quick start on Windows
 
@@ -102,6 +102,14 @@ python -m codemind ask "Explain this code" --provider openai-compatible --base-u
 ```
 
 Provider model IDs, free-tier availability and quotas depend on the provider. Sending a prompt to a hosted provider sends that prompt, retrieved excerpts and selected workspace snippets off your computer. Use this only when you have chosen a provider and are comfortable with its data policy.
+
+Create a support bundle containing operational logs and app metadata (not project source files or prompts):
+
+```powershell
+python -m codemind diagnostics --output .\\codemind-support.zip
+```
+
+Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\\.codemind\\logs` by default. Remote upload is not implemented yet.
 
 Search the knowledge library without starting a model:
 
