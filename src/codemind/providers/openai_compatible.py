@@ -10,6 +10,7 @@ import json
 import os
 import time
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from .base import GenerationResult
@@ -35,6 +36,9 @@ class OpenAICompatibleProvider:
         ).rstrip("/")
         self.api_key = api_key or os.environ.get("CODEMIND_API_KEY")
         self.timeout = timeout
+        parsed = urlparse(self.base_url)
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("Hosted provider base URL must be an HTTPS URL without embedded credentials.")
 
     def generate(
         self,
