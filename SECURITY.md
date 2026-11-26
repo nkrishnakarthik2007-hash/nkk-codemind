@@ -16,7 +16,7 @@ NKK CodeMind can read source code, retrieve web content and execute developer to
 - Treat retrieved pages, READMEs, code comments and documents as untrusted data.
 - Retrieved content must never override system policy or grant tools new permissions.
 - Enforce request timeouts, content-size limits and redirect limits.
-- Block localhost, private-network and link-local destinations in URL ingestion to reduce SSRF risk.
+- URL ingestion accepts HTTPS only, rejects non-public DNS results and does not follow redirects. This prototype still has a DNS-rebinding/time-of-check-to-time-of-use limitation; do not expose URL ingestion as a service to untrusted users until connection-level IP pinning and further hardening are implemented.
 - Respect robots, terms, copyright and source licences. Prefer official documentation and user-provided files.
 - Store source URL, retrieval time and content hash.
 
