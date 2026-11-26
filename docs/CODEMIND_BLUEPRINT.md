@@ -78,6 +78,35 @@ The user must be able to inspect and approve the plan before implementation. A p
 5. Do not force-push, delete branches, merge PRs, publish releases or alter repository settings without explicit user approval.
 6. Require successful CI before creating a production release.
 
+## 3.1 Product identity and visual direction
+
+CodeMind should become a branded NKK developer super-app, not a plain chat wrapper.
+- Product identity: **NKK CodeMind**, consistent with the user's NKK DroidBox branding and future portfolio.
+- Create a polished Windows 11 interface with a custom splash/loading screen, first-run setup, project dashboard, editor, agent chat, plan/review views, terminal, model manager and settings.
+- Use a coherent design system: typography, spacing, icons, motion, light/dark themes, responsive panels and accessible contrast.
+- The loading screen should show real startup progress (engine startup, model/runtime detection, workspace restore), not an endless decorative spinner.
+- Keep the desktop shell modular so future NKK tools can share design language without forcing unrelated products into one executable.
+- Brand assets, logo and final visual style will be designed as a dedicated UI milestone.
+
+## 3.2 Unified open-source strategy — integrate, do not blindly merge
+
+The goal is to combine the strongest ideas and compatible components from open-source coding tools into one coherent product. We must not concatenate entire repositories or copy code without reviewing licenses, attribution, dependencies, security and maintenance status.
+
+Reference capabilities to study:
+- OpenCode: agent sessions, plan/build modes, provider abstraction and desktop/terminal workflows. Its upstream repository is MIT licensed. [Source](https://github.com/anomalyco/opencode)
+- Aider: repository mapping, Git-aware edits, automatic test/lint loops and broad model connectivity. Its upstream repository is Apache-2.0. [Source](https://github.com/Aider-AI/aider)
+- Continue: IDE/agent integration and model configuration patterns. The public repository is Apache-2.0, but its upstream repository states it is no longer actively maintained; evaluate selected code carefully. [Source](https://github.com/continuedev/continue)
+- VS Code / Code-OSS: editor workbench, extension ecosystem and Monaco editor architecture. Code-OSS is MIT licensed; the Microsoft VS Code distribution includes Microsoft-specific assets and services under a separate product license. Do not redistribute Microsoft's proprietary branding/assets or assume all marketplace extensions are open source. [Source](https://github.com/microsoft/vscode)
+
+Integration rules:
+1. Build a capability matrix before choosing any component.
+2. Prefer well-maintained libraries, protocols and reusable packages over importing entire applications.
+3. Check exact license files, notices, transitive dependencies, trademarks, model licenses and distribution restrictions.
+4. Preserve required copyright, attribution and NOTICE files.
+5. Keep adapters around imported components so they can be replaced.
+6. Avoid copying proprietary Cursor/Codex internals. Recreate desired workflows independently using permitted open-source code and public APIs.
+7. Maintain a third-party components register with repository URL, version/commit, license, changes, notices and security status.
+
 ## 4. Technical architecture
 
 ### Desktop shell
@@ -98,6 +127,43 @@ Core modules:
 - Verification: tests, lint, build and independent review.
 - Memory: project rules, decisions and resumable task summaries.
 - Observability: structured logs and privacy-safe diagnostics.
+
+### Intelligent model router and token economy
+
+CodeMind must support many local and hosted models through adapters, not bind the product to one model vendor.
+
+**Model registry**
+- Discover local Ollama models and their metadata.
+- Allow users to add compatible local runtimes and OpenAI-compatible hosted endpoints.
+- Maintain capability metadata: coding, tool calling, structured output, context window, vision, speed, memory footprint, license and provider cost.
+- Test actual capabilities instead of trusting model names alone.
+
+**Task-aware routing**
+- Classify each task by difficulty, risk, context needs and required capabilities.
+- Use small local models for routine work: repository summaries, file classification, retrieval queries, context compression, simple explanations, formatting suggestions and lightweight checks.
+- Use stronger local models when available for code edits and multi-file reasoning.
+- Use a selected cloud model for genuinely difficult work only when the user has enabled that provider.
+- Use a local model before and after cloud calls to prepare a concise task packet, summarize results and validate outputs where practical.
+- Never silently send source code, prompts or private repository contents to a cloud provider. Show the provider and data scope.
+
+**Token-efficient complete-work strategy**
+- Index the repository locally and retrieve only relevant files/symbols.
+- Maintain a compact project map and durable task state rather than resending full conversation history.
+- Use local models to summarize long logs, docs and previous agent turns before they enter a cloud context.
+- Send focused diffs and relevant code windows, not entire files or repositories.
+- Use progressive disclosure: start with a small context packet and fetch more only when evidence requires it.
+- Cache stable system instructions, repository summaries and reusable documentation where the provider supports prompt caching.
+- Set explicit per-task budgets for context, output, retries and cloud spend; show estimates and actual usage.
+- Use structured tool results and short machine-readable summaries rather than verbose chain-of-thought.
+- Do not compress away acceptance criteria, constraints, test evidence or critical code details just to save tokens.
+- If a task exceeds the budget, checkpoint it and continue in stages rather than silently truncating essential work.
+
+**Routing policy**
+- Prefer local inference when it meets the task's quality and latency target.
+- Escalate to cloud only for a capability gap or a task complexity threshold chosen by the user.
+- Allow a cloud model to delegate context preparation and routine sub-tasks to local models.
+- Record model choice, reason, token usage, latency and estimated cost without storing secrets.
+- Provide modes such as Local Only, Hybrid (recommended), and Cloud Only.
 
 ### Model/provider layer
 - Ollama is the first local runtime.
@@ -147,6 +213,13 @@ Suggested directories:
 - updates/ — temporary staging only.
 
 Store credentials using Windows Credential Manager or Git Credential Manager. Updates must preserve settings, project links, knowledge, history and credentials. Keep rollback support and never overwrite user project files during an application update.
+
+## 6.1 Hybrid model execution modes
+
+- **Local Only:** all prompts and source stay on the device; quality and speed depend on installed models.
+- **Hybrid:** local models do repository indexing, retrieval, summarization and routine tasks; a cloud model is used only for selected complex reasoning after explicit user enablement and data-scope consent.
+- **Cloud Only:** user explicitly chooses a hosted provider for all model calls.
+- Every mode must show the active model/provider. There must be a global switch to disable cloud inference immediately.
 
 ## 7. Free-first operating model
 
