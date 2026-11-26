@@ -46,3 +46,8 @@ def test_cloud_provider_sends_authorized_chat_request(monkeypatch):
     assert captured["url"] == "https://example-provider.test/v1/chat/completions"
     assert captured["auth"] == "Bearer test-secret"
     assert captured["payload"]["max_tokens"] == 512
+
+
+def test_cloud_provider_rejects_plain_http_endpoint():
+    with pytest.raises(ValueError, match="HTTPS"):
+        OpenAICompatibleProvider(base_url="http://provider.example/v1", api_key="secret")
