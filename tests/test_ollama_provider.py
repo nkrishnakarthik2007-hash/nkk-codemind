@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from codemind.providers.base import GenerationResult
 from codemind.providers.ollama import OllamaProvider
 
 
