@@ -63,10 +63,10 @@
 
 ## Milestone 6 — Diagnostics and remote development loop
 
-- [ ] Structured rotating logs with correlation IDs.
-- [ ] Secret redaction and privacy-safe diagnostic bundles.
-- [ ] Secure GitHub authentication using OS credential storage.
-- [ ] Upload diagnostics to a separate private repository and create/update issues.
+- [x] Structured rotating JSONL logs (correlation IDs remain future work).
+- [x] Common-secret redaction and privacy-safe diagnostic bundles.
+- [ ] Secure GitHub authentication using OS credential storage/device authorization.
+- [x] Opt-in upload to a verified private repository and GitHub issue creation (environment-token prototype; automatic error upload remains future work).
 - [ ] GitHub-assisted branch, patch, test and pull-request workflow.
 - [ ] Require passing CI before release publication.
 
