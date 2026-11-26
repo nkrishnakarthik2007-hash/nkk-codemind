@@ -20,7 +20,7 @@ It aims to make useful AI-assisted software development available on CPU-only co
 
 ## Status
 
-Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, and now writes local rotating diagnostics with a privacy-safe support-bundle export. It is **not yet** a full autonomous coding agent, remote GitHub diagnostics uploader, or Windows desktop application.
+Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, and now writes local rotating diagnostics, exports privacy-safe support bundles, and can upload a bundle to a verified private GitHub repository when explicitly requested. It is **not yet** a full autonomous coding agent, automatic error uploader, or Windows desktop application.
 
 See:
 - [VISION.md](VISION.md) — product principles and boundaries
@@ -109,7 +109,14 @@ Create a support bundle containing operational logs and app metadata (not projec
 python -m codemind diagnostics --output .\\codemind-support.zip
 ```
 
-Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\\.codemind\\logs` by default. Remote upload is not implemented yet.
+Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\\.codemind\\logs` by default. To explicitly upload the bundle to a private GitHub repository, create a fine-grained token with **Contents: Read and write** and **Issues: Read and write** for that private repository, then set it only for the current PowerShell session:
+
+```powershell
+$env:CODEMIND_GITHUB_TOKEN = Read-Host 'GitHub token'
+python -m codemind diagnostics --upload --repo YOUR_ACCOUNT/private-diagnostics
+```
+
+The command checks that the destination repository is private, uploads the ZIP, and opens a GitHub issue. Never put the token in source code or commit it to Git. Automatic upload on errors and secure Windows Credential Manager storage are still planned.
 
 Search the knowledge library without starting a model:
 
