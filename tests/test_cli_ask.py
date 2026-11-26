@@ -1,5 +1,5 @@
 from codemind import cli
-from codemind.providers.ollama import GenerationResult
+from codemind.providers.base import GenerationResult
 
 
 class FakeProvider:
