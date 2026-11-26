@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from codemind.providers.ollama import OllamaError, OllamaProvider
+from codemind.providers.ollama import OllamaProvider
 
 
 class FakeResponse:
