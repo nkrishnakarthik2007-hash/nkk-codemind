@@ -6,10 +6,15 @@ contents are deliberately never passed to the logger by the CLI.
 
 from __future__ import annotations
 
+import base64
 import json
 import logging
+import os
 import platform
 import re
+import urllib.error
+import urllib.request
+import uuid
 import zipfile
 from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
@@ -126,3 +131,99 @@ def create_support_bundle(destination: Path, home: Path | None = None) -> Path:
                 if log_file.is_file():
                     archive.write(log_file, arcname=f"logs/{log_file.name}")
     return destination
+
+
+
+def upload_support_bundle(
+    bundle_path: Path,
+    repository: str,
+    token: str | None = None,
+) -> str:
+    """Upload a support ZIP to a private GitHub repository and open an issue.
+
+    The token is read from CODEMIND_GITHUB_TOKEN by default. It is never logged.
+    The destination repository is checked with GitHub before any file is uploaded.
+    """
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        raise ValueError("Repository must use the owner/name format.")
+
+    credential = token or os.environ.get("CODEMIND_GITHUB_TOKEN")
+    if not credential:
+        raise ValueError(
+            "GitHub upload is not configured. Set CODEMIND_GITHUB_TOKEN with "
+            "Contents and Issues write access to a private diagnostics repository."
+        )
+
+    bundle = bundle_path.expanduser().resolve()
+    if not bundle.is_file():
+        raise FileNotFoundError(f"Support bundle not found: {bundle}")
+    if bundle.stat().st_size > 10 * 1024 * 1024:
+        raise ValueError("Support bundle exceeds the 10 MB upload limit.")
+
+    api_root = "https://api.github.com"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {credential}",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "NKK-CodeMind",
+    }
+
+    def request_json(method: str, url: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        data = json.dumps(payload).encode("utf-8") if payload is not None else None
+        request = urllib.request.Request(url, data=data, headers=headers, method=method)
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:500]
+            raise RuntimeError(
+                f"GitHub request failed ({exc.code}). Check repository permissions and token scopes. "
+                f"GitHub response: {detail}"
+            ) from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"Could not reach GitHub: {exc.reason}") from exc
+
+    repo_info = request_json("GET", f"{api_root}/repos/{repository}")
+    if repo_info.get("private") is not True:
+        raise ValueError(
+            "Diagnostics upload is blocked: the destination repository must be private."
+        )
+
+    timestamp = datetime.now(timezone.utc)
+    report_path = (
+        f"diagnostics/{timestamp:%Y/%m/%d}/"
+        f"codemind-{timestamp:%Y%m%dT%H%M%SZ}-{uuid.uuid4().hex[:8]}.zip"
+    )
+    content = base64.b64encode(bundle.read_bytes()).decode("ascii")
+    uploaded = request_json(
+        "PUT",
+        f"{api_root}/repos/{repository}/contents/{report_path}",
+        {
+            "message": "Upload sanitized CodeMind diagnostic bundle",
+            "content": content,
+        },
+    )
+    file_url = uploaded.get("content", {}).get("html_url")
+    if not file_url:
+        raise RuntimeError("GitHub accepted the upload but did not return a report URL.")
+
+    issue = request_json(
+        "POST",
+        f"{api_root}/repos/{repository}/issues",
+        {
+            "title": f"CodeMind diagnostic report — {timestamp:%Y-%m-%d %H:%M UTC}",
+            "body": (
+                "A CodeMind support bundle was uploaded.\n\n"
+                f"- Report: [Download diagnostic ZIP]({file_url})\n"
+                f"- Created (UTC): {timestamp.isoformat()}\n"
+                "- The bundle contains local operational logs and a small app manifest. "
+                "Review it before sharing with anyone."
+            ),
+        },
+    )
+    issue_url = issue.get("html_url")
+    if not issue_url:
+        raise RuntimeError(
+            f"The report was uploaded to {file_url}, but GitHub did not return an issue URL."
+        )
+    return issue_url
