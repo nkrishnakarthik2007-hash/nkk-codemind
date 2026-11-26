@@ -30,6 +30,7 @@ See:
 - [SECURITY.md](SECURITY.md) — safety and privacy principles
 - [docs/LOCAL_MODEL_SETUP.md](docs/LOCAL_MODEL_SETUP.md) — Windows setup instructions
 - [docs/CLOUD_PROVIDER_SETUP.md](docs/CLOUD_PROVIDER_SETUP.md) — optional hosted inference
+- [docs/AUTOMATIC_DEVELOPMENT_LOOP.md](docs/AUTOMATIC_DEVELOPMENT_LOOP.md) — planned diagnostics, GitHub development and automatic updates
 
 ## Quick start on Windows
 
