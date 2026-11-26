@@ -1,0 +1,21 @@
+{
+  "name": "@nkk/codemind-agent-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local, read-only OpenCode SDK host for NKK CodeMind",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opencode/sdk": "2.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.1",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.3.0"
+  }
+}
