@@ -69,7 +69,19 @@ Add public documentation:
 python -m codemind add-url https://docs.python.org/3/tutorial/ --tags python,official
 ```
 
-Ask the local model. CodeMind retrieves a small number of relevant saved excerpts and sends them with the question:
+Inspect a project before asking questions:
+
+```powershell
+python -m codemind inspect .\my-project
+```
+
+Ask the local model. CodeMind retrieves relevant saved excerpts and, when `--workspace` is supplied, selects a few relevant source files rather than sending the whole repository:
+
+```powershell
+python -m codemind ask "Find the login bug and suggest a fix" --model qwen2.5-coder:1.5b --workspace .\my-project
+```
+
+The current workspace integration is **read-only context selection**. It does not edit files or run commands yet.
 
 ```powershell
 python -m codemind ask "How do I read JSON from a file in Python?" --model qwen2.5-coder:1.5b
