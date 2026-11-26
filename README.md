@@ -26,6 +26,7 @@ See:
 - [VISION.md](VISION.md) — product principles and boundaries
 - [ARCHITECTURE.md](ARCHITECTURE.md) — proposed technical design
 - [docs/CODEMIND_BLUEPRINT.md](docs/CODEMIND_BLUEPRINT.md) — full product blueprint for the autonomous coding workspace
+- [docs/OPEN_SOURCE_RESEARCH.md](docs/OPEN_SOURCE_RESEARCH.md) — project comparison, failure lessons, licensing register, and OpenCode SDK architecture decision
 - [ROADMAP.md](ROADMAP.md) — staged implementation plan
 - [MODEL_RESEARCH.md](MODEL_RESEARCH.md) — model and runtime evaluation plan
 - [SECURITY.md](SECURITY.md) — safety and privacy principles
