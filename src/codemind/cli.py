@@ -134,10 +134,12 @@ def main(argv: list[str] | None = None) -> int:
                     args.workspace, args.prompt, max_files=args.max_files,
                     max_chars_per_file=args.file_chars,
                 )
+                language_text = ", ".join(summary.languages) or "not detected"
+                framework_text = ", ".join(summary.frameworks) or "not detected"
                 system += (
                     f"\n\nProject workspace: {summary.root}\n"
-                    f"Detected languages: {", ".join(summary.languages)}\n"
-                    f"Detected frameworks: {", ".join(summary.frameworks)}"
+                    f"Detected languages: {language_text}\n"
+                    f"Detected frameworks: {framework_text}"
                 )
                 if selected:
                     system += "\n\nRelevant project files (read-only context):\n" + "\n\n".join(
