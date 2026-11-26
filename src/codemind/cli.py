@@ -6,7 +6,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from .diagnostics import (\n    configure_logging,\n    create_support_bundle,\n    record_event,\n    upload_support_bundle,\n)
+from .diagnostics import (
+    configure_logging,
+    create_support_bundle,
+    record_event,
+    upload_support_bundle,
+)
 from .knowledge.ingest import add_url
 from .knowledge.library import KnowledgeLibrary
 from .providers.ollama import OllamaError, OllamaProvider
@@ -203,7 +208,7 @@ def main(argv: list[str] | None = None) -> int:
             for item in items:
                 print(f"{item.title} | {item.source_type} | {item.item_id}")
         return 0
-    except (OSError, ValueError, OllamaError, CloudProviderError) as exc:
+    except (OSError, ValueError, RuntimeError, OllamaError, CloudProviderError) as exc:
         record_event("command_failed", command=args.command, error_type=type(exc).__name__)
         print(f"Error: {exc}", file=sys.stderr)
         return 2
