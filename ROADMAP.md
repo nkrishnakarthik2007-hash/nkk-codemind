@@ -41,7 +41,7 @@
 - [ ] Implement model selection and fallback based on task, capability, latency, privacy and quota.
 - [ ] Support streaming and cancellation.
 - [x] Require explicit hosted-provider selection and HTTPS endpoints.
-- [ ] Keep secrets outside repository and logs.
+- [x] Keep API keys in environment variables rather than repository files.
 
 ## Milestone 4 — Coding workspace engine
 
