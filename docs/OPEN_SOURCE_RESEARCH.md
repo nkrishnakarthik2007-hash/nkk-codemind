@@ -76,7 +76,7 @@ Prefer stable SDKs, APIs, protocols, and adapters. Copy source code only when th
 
 ## 5. Architecture decision: OpenCode as the first agent runtime
 
-**Decision:** Adopt the OpenCode SDK as the first coding-agent runtime behind a CodeMind-owned adapter.
+**Decision:** Adopt the OpenCode SDK as the first coding-agent runtime behind a CodeMind-owned adapter. The initial prototype pins SDK version 2.4.1 exactly; upgrades must be deliberate and CI-verified.
 
 Why:
 - The SDK can host OpenCode inside an application process and exposes sessions, prompts, and event streams.
