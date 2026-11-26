@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+
+from .base import GenerationResult
 
 
 @dataclass(frozen=True)
@@ -19,15 +20,6 @@ class ModelInfo:
     size_bytes: int | None = None
     parameter_size: str | None = None
     quantization: str | None = None
-
-
-@dataclass(frozen=True)
-class GenerationResult:
-    text: str
-    model: str
-    prompt_tokens: int | None = None
-    generated_tokens: int | None = None
-    total_duration_ns: int | None = None
 
 
 class OllamaError(RuntimeError):
