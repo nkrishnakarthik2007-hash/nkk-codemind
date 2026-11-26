@@ -99,7 +99,7 @@ def add_url(library: KnowledgeLibrary, url: str, *, tags: tuple[str, ...] = ()) 
         text = parser.text()
     else:
         text = decoded
-    title_match = re.search(r"<title[^>]*>(.*?)</title>", decoded, re.I | re.S)
+    title_match = re.search(r"<title[^>]*>(.*?)</title>", decoded, re.IGNORECASE | re.DOTALL)
     title = re.sub(r"\s+", " ", title_match.group(1)).strip() if title_match else url
     if not text:
         raise ValueError("No readable text was found at this URL.")
