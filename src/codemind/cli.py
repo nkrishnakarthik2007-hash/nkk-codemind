@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .diagnostics import configure_logging, create_support_bundle, record_event
+from .diagnostics import (\n    configure_logging,\n    create_support_bundle,\n    record_event,\n    upload_support_bundle,\n)
 from .knowledge.ingest import add_url
 from .knowledge.library import KnowledgeLibrary
 from .providers.ollama import OllamaError, OllamaProvider
@@ -60,6 +60,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     diagnostics = sub.add_parser("diagnostics", help="Export a privacy-safe support bundle")
     diagnostics.add_argument("--output", type=Path, default=Path("codemind-support.zip"))
+    diagnostics.add_argument("--upload", action="store_true", help="Upload to a private GitHub diagnostics repository")
+    diagnostics.add_argument("--repo", help="Private GitHub repository in owner/name format")
     return parser
 
 
@@ -73,6 +75,12 @@ def main(argv: list[str] | None = None) -> int:
             bundle = create_support_bundle(args.output)
             print(f"Support bundle created: {bundle}")
             print("Review the ZIP before sharing it. It contains operational logs, not project files.")
+            if args.upload:
+                if not args.repo:
+                    raise ValueError("--repo owner/name is required with --upload.")
+                issue_url = upload_support_bundle(bundle, args.repo)
+                print(f"Uploaded to private GitHub diagnostics repository: {issue_url}")
+                record_event("diagnostics_uploaded", destination="private_github")
             record_event("diagnostics_bundle_created")
             return 0
         if args.command == "inspect":
