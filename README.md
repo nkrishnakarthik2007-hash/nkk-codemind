@@ -112,8 +112,11 @@ python -m codemind diagnostics --output .\\codemind-support.zip
 Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\\.codemind\\logs` by default. To explicitly upload the bundle to a private GitHub repository, create a fine-grained token with **Contents: Read and write** and **Issues: Read and write** for that private repository, then set it only for the current PowerShell session:
 
 ```powershell
-$env:CODEMIND_GITHUB_TOKEN = Read-Host 'GitHub token'
+$secureToken = Read-Host 'GitHub token' -AsSecureString
+$tokenPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureToken)
+try { $env:CODEMIND_GITHUB_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($tokenPointer) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($tokenPointer) }
 python -m codemind diagnostics --upload --repo YOUR_ACCOUNT/private-diagnostics
+Remove-Item Env:CODEMIND_GITHUB_TOKEN
 ```
 
 The command checks that the destination repository is private, uploads the ZIP, and opens a GitHub issue. Never put the token in source code or commit it to Git. Automatic upload on errors and secure Windows Credential Manager storage are still planned.
