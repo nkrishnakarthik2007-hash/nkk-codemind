@@ -21,6 +21,7 @@ We depend on the upstream package instead of copying unreviewed source files. Th
 
 CPU inference still consumes RAM. The initial policy is deliberately conservative:
 - One active model request at a time.
+- Configurable Ollama CPU thread count (default 4) to avoid monopolizing every logical core.
 - Sequential ensembles, never parallel model fan-out.
 - Default 2,048-token context and bounded output.
 - Ollama native API with `keep_alive=0` by default to request unloading after each response.
