@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from gama.abmcts import ABMCTSBackend
-from gama.backends import EnsembleBackend, GamaBackend\nfrom gama.meshflow import MeshflowBackend\nfrom gama.abmcts import ABMCTSBackend
+from gama.backends import EnsembleBackend, GamaBackend
 from gama.benchmark import SUITES, run_bench, summarize
-from gama.config import build_backend
 from gama.meshflow import MeshflowBackend
 from gama.models import ModelTier
 
@@ -17,9 +16,7 @@ def ask(config: LabConfig, model_name: str, prompt: str, task_type: str = "gener
     backends, _ = build_backends(config)
     if model_name not in backends:
         raise ValueError(f"Unknown model {model_name!r}.")
-    return backends[model_name].complete(
-        prompt, ModelTier.SMALL, task_type=task_type
-    )
+    return backends[model_name].complete(prompt, ModelTier.SMALL, task_type=task_type)
 
 
 def combine(
@@ -55,15 +52,54 @@ def develop_pipeline(
     )
     result = {"plan": plan, "implementation": code}
     if reviewer:
-        review = backends[reviewer].complete(
+        result["review"] = backends[reviewer].complete(
             "Review this proposed implementation. Identify concrete bugs, missing cases and "
             "security problems. Do not claim tests were run.\n"
             f"Task:\n{prompt}\n\nPlan:\n{plan}\n\nImplementation:\n{code}",
             ModelTier.SMALL,
             task_type="code_review",
         )
-        result["review"] = review
     return result
+
+
+def build_verified_escalation(config: LabConfig, model_names: list[str]):
+    """Build GAMA's cheap-to-strong verification escalation over serial CPU adapters."""
+    backends, _ = build_backends(config)
+    if not 1 <= len(model_names) <= config.max_ensemble_members:
+        raise ValueError(
+            f"Choose between 1 and {config.max_ensemble_members} escalation tiers."
+        )
+    missing = [name for name in model_names if name not in backends]
+    if missing:
+        raise ValueError(f"Unknown model names: {', '.join(missing)}")
+    tiers = [(name, backends[name]) for name in model_names]
+    return MeshflowBackend(
+        tiers,
+        verify=None,  # GAMA benchmark supplies its deterministic case checker per call.
+        mesh="synthesize",
+        aggregator=backends[model_names[-1]],
+        pass_score=1.0,
+    )
+
+
+def build_adaptive_search(config: LabConfig, model_names: list[str], budget: int = 3):
+    """Build GAMA AB-MCTS with a small, bounded model-call budget."""
+    backends, _ = build_backends(config)
+    if not 1 <= len(model_names) <= config.max_ensemble_members:
+        raise ValueError(
+            f"Choose between 1 and {config.max_ensemble_members} search workers."
+        )
+    missing = [name for name in model_names if name not in backends]
+    if missing:
+        raise ValueError(f"Unknown model names: {', '.join(missing)}")
+    workers = [(name, backends[name]) for name in model_names]
+    return ABMCTSBackend(
+        workers,
+        verify=None,  # GAMA benchmark supplies its deterministic case checker per call.
+        budget=max(1, min(int(budget), 4)),
+        pass_score=1.0,
+        seed=7,
+    )
 
 
 def benchmark(
@@ -71,17 +107,29 @@ def benchmark(
     model_names: list[str],
     suite_name: str = "qadeep",
     repeats: int = 1,
+    strategy: str = "single",
 ) -> dict:
-    """Run GAMA's deterministic graders. qadeep is the safe default (no generated-code execution)."""
+    """Run GAMA deterministic graders; qadeep never executes generated code."""
     if suite_name not in SUITES:
-        raise ValueError(f"Unknown GAMA suite {suite_name!r}. Available: {', '.join(sorted(SUITES))}")
+        raise ValueError(
+            f"Unknown GAMA suite {suite_name!r}. Available: {', '.join(sorted(SUITES))}"
+        )
     if suite_name != "qadeep":
         raise ValueError(
             "Only qadeep is enabled in the initial CPU lab. Other GAMA suites may execute "
             "model-generated code; add a separately reviewed OS sandbox before enabling them."
         )
     backends, _ = build_backends(config)
-    chosen = {name: backends[name] for name in model_names}
+    if strategy == "single":
+        chosen = {name: backends[name] for name in model_names}
+    elif strategy == "ensemble":
+        chosen = {"codemind-ensemble": build_sequential_ensemble(config, model_names)}
+    elif strategy == "meshflow":
+        chosen = {"codemind-meshflow": build_verified_escalation(config, model_names)}
+    elif strategy == "abmcts":
+        chosen = {"codemind-abmcts": build_adaptive_search(config, model_names)}
+    else:
+        raise ValueError("strategy must be single, ensemble, meshflow or abmcts")
     records = run_bench(
         chosen,
         suite=SUITES[suite_name],
@@ -93,14 +141,8 @@ def benchmark(
 
 
 __all__ = [
-    "ABMCTSBackend",
-    "EnsembleBackend",
-    "GamaBackend",
-    "MeshflowBackend",
-    "ask",
-    "benchmark",
-    "build_router",
-    "build_sequential_ensemble",
-    "combine",
-    "develop_pipeline",
+    "ABMCTSBackend", "EnsembleBackend", "GamaBackend", "MeshflowBackend",
+    "ask", "benchmark", "build_adaptive_search", "build_router",
+    "build_sequential_ensemble", "build_verified_escalation",
+    "combine", "develop_pipeline",
 ]
