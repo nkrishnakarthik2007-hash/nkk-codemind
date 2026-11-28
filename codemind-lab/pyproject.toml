@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nkk-codemind-lab"
+version = "0.1.0"
+description = "CPU-first small-model composition experiments for NKK CodeMind"
+requires-python = ">=3.10"
+dependencies = [
+  "gama-llm @ git+https://github.com/akihidem/gama.git@b7016dc1631d16c09c8eda67bbcb0a40d068bf18",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.scripts]
+codemind-lab = "codemind_lab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["codemind_lab*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
