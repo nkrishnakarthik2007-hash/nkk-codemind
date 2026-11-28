@@ -28,6 +28,7 @@ class LabConfig:
     reserve_ram_gb: float = 1.5
     max_parallel_calls: int = 1
     max_ensemble_members: int = 2
+    cpu_threads: int = 4
     request_timeout_seconds: int = 180
 
 
@@ -114,10 +115,17 @@ def load_config(path: str | Path) -> LabConfig:
     max_members = int(policy.get("max_ensemble_members", 2))
     if not 1 <= max_members <= 4:
         raise ValueError("max_ensemble_members must be between 1 and 4.")
+    cpu_threads = int(policy.get("cpu_threads", 4))
+    if not 1 <= cpu_threads <= 32:
+        raise ValueError("cpu_threads must be between 1 and 32.")
+    reserve = float(policy.get("reserve_ram_gb", 1.5))
+    if reserve < 0:
+        raise ValueError("reserve_ram_gb cannot be negative.")
     return LabConfig(
         models=tuple(models),
-        reserve_ram_gb=float(policy.get("reserve_ram_gb", 1.5)),
+        reserve_ram_gb=reserve,
         max_parallel_calls=1,
         max_ensemble_members=max_members,
+        cpu_threads=cpu_threads,
         request_timeout_seconds=int(policy.get("request_timeout_seconds", 180)),
     )
