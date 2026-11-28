@@ -1,41 +1,71 @@
-# CPU-first Model Lab
+# Model and Runtime Research
 
-Target: CPU-only Windows PCs. Initial hardware target is Intel Core i7-1185G7 with 16 GB RAM and no discrete GPU; preserve an 8 GB RAM design target.
+This file is an evaluation plan, not a declaration that any candidate is the best.
 
-## Combining models
-1. Routing: select the best measured specialist per task. Build this first.
-2. Sequential collaboration: one model drafts and another reviews only when useful.
-3. Weight merging/distillation: experimental; requires compatible architecture, tensor shapes, tokenizer, data and evaluation. Merging unrelated models is not a shortcut and can reduce quality.
+## Runtime candidates
 
-On CPU, load one model at a time by default. Concurrent 3B/4B models can exhaust RAM and reduce speed.
+| Runtime | Why investigate | Notes |
+|---|---|---|
+| llama.cpp | Mature CPU inference, GGUF quantization, broad model support | Baseline candidate |
+| BitNet.cpp | Specialized low-bit CPU inference | Test supported models and real coding quality |
+| Ollama | Convenient local model lifecycle and API | Useful development option; measure overhead |
+| ONNX Runtime GenAI | Deployment/runtime option for supported models | Check model and CPU support |
+| Transformers + CPU | Broad Hugging Face compatibility | May have higher memory/runtime overhead |
 
-## Candidate pool
-| Candidate | Initial role |
-|---|---|
-| Qwen3.5 0.8B / 2B | quick classification and extraction |
-| Qwen3.5 4B | general and multilingual baseline |
-| Qwen2.5-Coder 3B | code generation and repair |
-| Phi-4-mini | compact reasoning and structured output |
-| Gemma 4 E2B | compact instruction / multimodal experiment |
+## Model candidates
 
-These are candidates, not winners. Verify exact tags, quantized sizes, revisions and licences before redistribution. Gemma has its own terms; do not call every open-weight model OSI open source.
+Candidate availability, licence, model card, tokenizer, context length and quantization must be rechecked at evaluation time.
 
-## Runtime plan
-- Ollama first: existing adapter and easy local model lifecycle.
-- llama.cpp next: GGUF quantization and CPU tuning.
-- OpenVINO: test Intel CPU acceleration on identical prompts.
-- BitNet.cpp: research only supported architectures/checkpoints.
+| Candidate family | Candidate size | Evaluation purpose |
+|---|---:|---|
+| Qwen2.5-Coder Instruct | 1.5B | Primary small coding baseline |
+| Qwen2.5-Coder Instruct | 0.5B / 3B | Smaller/larger comparisons where available |
+| StarCoder2 | 3B | Code generation/completion comparison |
+| SmolLM2 / other compact instruct models | 1.7B class | Planning and lightweight instruction following |
+| Microsoft BitNet family | supported small variants | CPU efficiency research |
+| Hosted models | provider-dependent | Escalation baseline |
 
-## Evaluation
-Use identical explanation, coding, debugging and JSON tasks. Record model, runtime, CPU, context, latency, tokens/sec and raw output. Later add peak RSS, quantization and tool-call reliability. Score correctness by running tests, not by speed or parameter count. The initial harness measures performance and saves outputs; it does not automatically judge code quality.
+Do not assume all models are OSI open source. Use the more precise term **open-weight** where model weights are available under a licence that may impose conditions. Verify each licence before redistribution or commercial use.
 
-## References
-- https://huggingface.co/Qwen/Qwen3.5-4B
-- https://ollama.com/library/qwen3.5
-- https://ollama.com/library/qwen2.5-coder
-- https://ollama.com/library/phi4-mini
-- https://ollama.com/library/gemma4
-- https://github.com/ggml-org/llama.cpp/blob/master/docs/models.md
-- https://docs.openvino.ai/2026/about-openvino/performance-benchmarks/generative-ai-performance.html
+## Benchmark protocol
 
-Automatic task routing, extra runtime adapters, agent collaboration, model merging and a verified winner remain future work.
+For each model/runtime/quantization combination record:
+
+- Exact model ID and revision
+- Licence and model-card URL
+- Quantization format and file size
+- CPU model, core count and RAM
+- Operating system and runtime version
+- Peak resident memory (RSS)
+- Prompt processing time
+- Generation tokens/second
+- Time to first token
+- Task success rate
+- Tool-call reliability
+- Failure examples
+
+## Task set
+
+1. Explain a short function.
+2. Write a small function with tests.
+3. Fix a seeded bug.
+4. Modify two related files.
+5. Follow a provided API reference.
+6. Diagnose a failing test from its output.
+7. Respect an existing project convention.
+
+Evaluate actual tests, not only subjective response quality.
+
+## Model collaboration experiment
+
+Compare:
+- One model doing the complete task
+- One small planner + one coder sequentially
+- One coder + independent reviewer sequentially
+- Local small model with cloud escalation
+
+Measure total latency, total tokens, provider cost/quota use, RAM peak and task success. Multiple agents can increase token use and latency; collaboration is not automatically better.
+
+## Model merging experiment
+
+Only investigate after strong individual baselines exist. Check architecture, tensor shape, tokenizer and licence compatibility. Evaluate merged checkpoints against each original model on the same task set. Keep the experiment optional and never require merging for normal operation.

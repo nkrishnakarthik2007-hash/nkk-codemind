@@ -135,17 +135,6 @@ python -m codemind ask "Explain this function" --model qwen2.5-coder:1.5b --num-
 
 Knowledge is stored under `%USERPROFILE%\.codemind` by default. Set `CODEMIND_HOME` to choose another directory.
 
-## CPU Model Lab
-
-List the CPU-first shortlist, explicitly download selected Ollama models, and benchmark installed models sequentially:
-
-- `python -m codemind model-candidates`
-- `python -m codemind model-candidates --pull qwen3.5:4b`
-- `python -m codemind model-candidates --pull qwen2.5-coder:3b`
-- `python -m codemind benchmark --models qwen3.5:4b qwen2.5-coder:3b --output model-results.json`
-
-The benchmark stores speed, latency, token counts and raw outputs. Correctness requires review and executable tests. See [MODEL_RESEARCH.md](MODEL_RESEARCH.md).
-
 ## Design constraints
 
 1. No model is required just to manage/search documentation.

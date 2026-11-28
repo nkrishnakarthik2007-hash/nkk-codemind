@@ -77,6 +77,13 @@ class OllamaProvider:
             if isinstance(item, dict) and item.get("name")
         ]
 
+    def pull_model(self, model: str) -> str:
+        """Download a model only after an explicit user request."""
+        if not model.strip():
+            raise ValueError("A model name is required.")
+        response = self._request("/api/pull", {"name": model, "stream": False})
+        return str(response.get("status") or "download request completed")
+
     def generate(
         self,
         model: str,
