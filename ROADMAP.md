@@ -57,7 +57,7 @@
 - [ ] Task classification and plan.
 - [ ] Detect missing documentation.
 - [ ] Retrieve official docs and user-supplied references.
-- [ ] Generate changes.
+- [x] Generate bounded unified-diff proposals and validate them before saving (user approval still required to apply).
 - [ ] Run verification and repair loop with limits.
 - [ ] Persist concise project state and decisions.
 
