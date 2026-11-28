@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from time import perf_counter
+
 from gama.abmcts import ABMCTSBackend
 from gama.backends import EnsembleBackend, GamaBackend
 from gama.benchmark import SUITES, run_bench, summarize
@@ -125,7 +127,7 @@ def profile_models(
         samples = []
         for index in range(max(1, min(int(repeats), 5))):
             free_before = available_memory_bytes()
-            started = __import__("time").perf_counter()
+            started = perf_counter()
             answer = backend.complete(prompt, ModelTier.SMALL)
             elapsed = __import__("time").perf_counter() - started
             free_after = available_memory_bytes()
