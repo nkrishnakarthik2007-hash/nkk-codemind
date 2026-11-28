@@ -1,4 +1,3 @@
-import io
 import json
 
 from gama.models import ModelTier
