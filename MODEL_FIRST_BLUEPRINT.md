@@ -252,3 +252,94 @@ Study licences and dependency requirements before adopting or copying any code. 
 - No destructive file, shell, database, Git push or desktop action without the required approval.
 - Never claim a build, test or deployment succeeded unless verified.
 - The engine remains independently useful to Ollama, LM Studio, VS Code and third-party clients.
+
+
+## 12. CPU-first small-model combination research — expanded priority
+
+The goal is not merely to route to an arbitrary large model. We want to investigate whether a carefully composed system of compact, open-weight models plus deterministic tools can deliver strong coding-agent results on CPU-only Windows machines.
+
+### Research finding: GAMA is a close prior-art project
+
+- Repository: https://github.com/akihidem/gama
+- The repository identifies an MIT licence.
+- It already explores small-model routing, ensembles, tool backends, benchmark-driven routing tables, verification-gated escalation and adaptive branching/search.
+- It supports OpenAI-compatible local servers including Ollama and LM Studio.
+- Its README's headline comparison uses 7B + 24B + 32B models on a Mac, so that headline is not evidence that the same result is achievable on a 16 GB CPU-only laptop.
+- Study its source and tests first. Reuse code only after reviewing the exact files, dependency tree, MIT notice/attribution obligations and whether its architecture fits our CPU budget. Prefer importing a small, well-tested component over copying the entire project.
+
+This discovery means the general idea of combining local models is not wholly unexplored. Our differentiator must be a reproducible, genuinely CPU-first small-model combination, measured on ordinary Windows hardware, with integration into VS Code/Ollama/LM Studio.
+
+### CPU inference foundation: BitNet
+
+Study https://github.com/microsoft/BitNet (MIT repository) and its BitNet b1.58 model/runtime. The official project describes CPU kernels and a 2.4B-parameter model; published speedups are project-reported and must be independently measured on our hardware. It is a promising inference track, not proof that it is the best coding model. Keep it separate from GGUF/llama.cpp candidates until compatibility and performance are verified.
+
+### Candidate model pool — download only after licence and format checks
+
+Initial evaluation pool, with multiple model families and task strengths:
+
+- Qwen2.5-Coder 0.5B / 1.5B / 3B: coding specialist candidates.
+- Qwen3 0.6B / 1.7B: compact general/reasoning candidates.
+- SmolLM2 135M / 360M / 1.7B: tiny routing, classification and lightweight tasks.
+- Granite small code/instruct models: coding and tool-following candidates.
+- StarCoder2 3B and OpenCoder 1.5B: code-generation comparisons.
+- BitNet b1.58 2.4B: CPU-efficient general model experiment.
+- Small embedding models, including BitNet embedding variants where runtime support is verified: retrieval, not chat generation.
+
+This is a candidate pool, not a promise that every model has a compatible licence, GGUF file, Ollama recipe or good Windows CPU performance. For each exact checkpoint record model-card URL, immutable revision, licence, tokenizer, architecture, context, format, quantization, download size and intended use. Do not redistribute weights unless the licence permits it.
+
+### Combination experiments — test all, keep only measured winners
+
+1. **Specialist routing:** one compact model per task class (code, explanation, planning, review, retrieval classification).
+2. **Sequential specialist pipeline:** planner → coder → reviewer, with one model unloaded before the next is loaded to keep peak RAM low.
+3. **Tool-augmented model:** a small model calls deterministic tools (tests, compiler, calculator, search, AST, Git) instead of trying to remember everything.
+4. **Independent review:** a second model reviews a patch only when its different failure profile justifies the added latency.
+5. **Selective ensemble:** ask multiple small models only for high-uncertainty tasks; aggregate using tests, static checks or a verifier rather than trusting majority vote alone.
+6. **Adaptive search:** explore alternative solutions, then spend more inference on the promising candidate. Bound branches, calls, time and memory.
+7. **Weight merging:** use MergeKit methods such as task arithmetic, TIES and DARE only for compatible model families/checkpoints (matching architecture and tensor structure, and usually a shared base). Never average unrelated architectures or tokenizers.
+8. **Distillation / LoRA:** train a compact student on legally usable teacher outputs/data and verified coding tasks; measure whether it retains useful skills at a lower CPU cost.
+9. **Quantization/runtime comparison:** compare GGUF quantization levels and BitNet formats on supported hardware; quality loss and actual RSS matter as much as file size.
+
+### Benchmark design for our actual laptop
+
+Use the Dell Latitude 7420 class target (Intel i7-1185G7, 16 GB RAM, CPU-only) as the first reference machine. Also test an 8 GB profile if possible.
+
+Measure each candidate and combination:
+- Peak process and system RAM, including model weights and KV cache
+- CPU utilization, thread count, temperature/throttling where observable
+- Time to first token, prompt processing speed and generation tokens/second
+- Cold start and warm start
+- Task success using hidden/sealed tests, not model self-rating
+- Patch correctness, regression rate, tool-call success and hallucinated APIs
+- Total wall-clock time and energy/power where measurable
+- Whether the machine remains responsive while inference runs
+
+Benchmark tasks: repository Q&A, small function + tests, bug fix, multi-file change, framework documentation lookup, debugging test output, code review, and build a minimal web app with a local database.
+
+Use identical prompts, context budgets and test environments. Separate development/tuning tasks from a sealed evaluation set. Keep negative results and failed combinations in the report.
+
+### CPU-first architecture hypothesis
+
+Prefer a small number of sequential model calls plus deterministic tools over running many models in parallel. Use complementary specialists, not several near-identical models. Maintain a memory-aware scheduler that loads one model, runs it, saves the structured result, unloads it, and then loads the next model. Parallel execution is allowed only when the measured free RAM budget safely supports it.
+
+### Download and source-code policy
+
+- First clone and inspect the GAMA source, tests, dependency list and MIT licence; do not immediately vendor it.
+- Study BitNet source and build instructions independently; its runtime is a separate inference backend.
+- Download candidate weights into a dedicated model cache, not the Git repository.
+- Keep model binaries out of Git; use a manifest with model IDs, revisions, hashes, licences and download instructions.
+- Never execute arbitrary scripts shipped with model repositories without inspection.
+- Do not scrape private endpoints or bypass rate limits. Use public model files and documented APIs.
+- The model set is extensible: evaluate new small models continuously, but promote a model only after reproducible benchmark results.
+
+### Immediate next implementation milestone
+
+Create a standalone `codemind-lab` experiment package before changing the production engine:
+- Model manifest and licence metadata.
+- OpenAI-compatible backend adapter for Ollama / LM Studio / llama.cpp.
+- Task suite and deterministic graders.
+- Baseline single-model runs.
+- Routing, sequential collaboration, verifier and selective ensemble experiments.
+- JSON/CSV results with hardware, model revision, latency and peak memory.
+- A comparison report that identifies the best measured configuration for CPU-only coding tasks.
+
+Only after the lab proves a winning combination should its routing/collaboration strategy be integrated into CodeMind Engine.
