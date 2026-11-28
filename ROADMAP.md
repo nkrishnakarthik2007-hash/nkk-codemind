@@ -47,8 +47,8 @@
 
 - [x] Project file inventory and basic language/framework detection.
 - [x] Relevant file selection and bounded read-only context assembly.
-- [ ] Safe patch-based editing.
-- [ ] Git diff and rollback-friendly workflow.
+- [x] Safe preview-first unified-diff application for existing UTF-8 files (explicit apply; path and symlink checks).
+- [ ] Git-aware diff, staged review and user-controlled rollback workflow (patch writes restore earlier files if a write fails).
 - [ ] Tool permission policy.
 - [ ] Test/formatter/linters integration.
 
