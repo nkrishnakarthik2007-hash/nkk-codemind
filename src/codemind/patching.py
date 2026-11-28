@@ -129,7 +129,7 @@ def _parse_file_patches(patch_text: str) -> list[tuple[str, list[tuple[int, int,
                     raise PatchError("Patches without a final newline are not supported yet.")
                 if not hunk_line or hunk_line[0] not in " +-":
                     break
-                marker, body = hunk_line[0], hunk_line[1:]
+                marker, body = hunk_line[0], hunk_line[1:].replace("\\r\\n", "\\n")
                 if marker in " -":
                     old_lines.append(body)
                     consumed_old += 1
