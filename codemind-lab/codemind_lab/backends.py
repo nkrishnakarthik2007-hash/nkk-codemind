@@ -50,7 +50,7 @@ class OllamaNativeBackend(ModelBackend):
         if not parsed.hostname or parsed.username or parsed.password:
             raise ValueError("Provider URL must have a host and no embedded credentials.")
         if parsed.scheme != "https" and parsed.hostname not in local_hosts:
-            raise ValueError("Non-local OpenAI-compatible endpoints must use HTTPS.")
+            raise ValueError("Non-local Ollama endpoints must use HTTPS.")
         if parsed.scheme not in {"http", "https"}:
             raise ValueError("Provider URL must use HTTP or HTTPS.")
         self.available = True
@@ -129,6 +129,14 @@ class OpenAICompatibleBackend(ModelBackend):
         self.spec = spec
         self.guard = guard
         self.timeout = timeout
+        parsed = urlparse(spec.base_url)
+        local_hosts = {"localhost", "127.0.0.1", "::1"}
+        if not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("Provider URL must have a host and no embedded credentials.")
+        if parsed.scheme != "https" and parsed.hostname not in local_hosts:
+            raise ValueError("Non-local OpenAI-compatible endpoints must use HTTPS.")
+        if parsed.scheme not in {"http", "https"}:
+            raise ValueError("Provider URL must use HTTP or HTTPS.")
         self.available = True
         self.last_usage = None
         self.last_finish_reason = None
