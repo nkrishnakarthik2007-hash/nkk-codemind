@@ -2,6 +2,7 @@
   "policy": {
     "reserve_ram_gb": 1.5,
     "max_parallel_calls": 1,
+    "cpu_threads": 4,
     "max_ensemble_members": 2,
     "request_timeout_seconds": 180
   },
