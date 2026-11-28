@@ -9,7 +9,7 @@ from gama.meshflow import MeshflowBackend
 from gama.models import ModelTier
 
 from .backends import build_backends, build_router, build_sequential_ensemble
-from .config import LabConfig
+from .config import LabConfig, available_memory_bytes
 
 
 def ask(config: LabConfig, model_name: str, prompt: str, task_type: str = "generic") -> str:
@@ -102,6 +102,70 @@ def build_adaptive_search(config: LabConfig, model_names: list[str], budget: int
     )
 
 
+
+def profile_models(
+    config: LabConfig,
+    model_names: list[str],
+    prompt: str = "Return exactly: CODEMIND_PROFILE_OK",
+    repeats: int = 2,
+) -> dict:
+    """Measure real endpoint latency, token throughput and free-RAM snapshots."""
+    if not prompt.strip():
+        raise ValueError("Profile prompt cannot be empty.")
+    if not model_names:
+        raise ValueError("Select at least one model to profile.")
+    backends, _ = build_backends(config)
+    missing = [name for name in model_names if name not in backends]
+    if missing:
+        raise ValueError(f"Unknown model names: {', '.join(missing)}")
+
+    results = {}
+    for name in model_names:
+        backend = backends[name]
+        samples = []
+        for index in range(max(1, min(int(repeats), 5))):
+            free_before = available_memory_bytes()
+            started = __import__("time").perf_counter()
+            answer = backend.complete(prompt, ModelTier.SMALL)
+            elapsed = __import__("time").perf_counter() - started
+            free_after = available_memory_bytes()
+            usage = getattr(backend, "last_usage", None) or {}
+            completion_tokens = usage.get("completion_tokens", 0)
+            prompt_tokens = usage.get("prompt_tokens", 0)
+            if not isinstance(completion_tokens, (int, float)):
+                completion_tokens = 0
+            if not isinstance(prompt_tokens, (int, float)):
+                prompt_tokens = 0
+            samples.append({
+                "run": index + 1,
+                "seconds": round(elapsed, 3),
+                "prompt_tokens": int(prompt_tokens),
+                "completion_tokens": int(completion_tokens),
+                "output_tokens_per_second": (
+                    round(completion_tokens / elapsed, 2) if elapsed > 0 and completion_tokens else None
+                ),
+                "free_ram_before_gb": (
+                    round(free_before / (1024 ** 3), 3) if free_before is not None else None
+                ),
+                "free_ram_after_gb": (
+                    round(free_after / (1024 ** 3), 3) if free_after is not None else None
+                ),
+                "answer_preview": answer[:240],
+            })
+        durations = [item["seconds"] for item in samples]
+        results[name] = {
+            "backend": getattr(backend, "name", type(backend).__name__),
+            "runs": samples,
+            "average_seconds": round(sum(durations) / len(durations), 3),
+            "fastest_seconds": min(durations),
+            "slowest_seconds": max(durations),
+            "memory_note": (
+                "RAM values are system-wide free-memory snapshots, not peak process RAM "
+                "or isolated model memory."
+            ),
+        }
+    return {"prompt": prompt, "results": results}
+
 def benchmark(
     config: LabConfig,
     model_names: list[str],
@@ -147,7 +211,7 @@ def benchmark(
 
 __all__ = [
     "ABMCTSBackend", "EnsembleBackend", "GamaBackend", "MeshflowBackend",
-    "ask", "benchmark", "build_adaptive_search", "build_router",
+    "ask", "benchmark", "profile_models", "build_adaptive_search", "build_router",
     "build_sequential_ensemble", "build_verified_escalation",
     "combine", "develop_pipeline",
 ]
