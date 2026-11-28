@@ -123,7 +123,7 @@ def _parse_file_patches(patch_text: str) -> list[tuple[str, list[tuple[int, int,
 
             while index < len(lines):
                 hunk_line = lines[index]
-                if hunk_line.startswith("@@ ") or hunk_line.startswith("--- "):
+                if hunk_line.startswith(("@@ ", "--- ")):
                     break
                 if hunk_line.startswith("\\ No newline at end of file"):
                     raise PatchError("Patches without a final newline are not supported yet.")
