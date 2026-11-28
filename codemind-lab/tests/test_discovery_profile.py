@@ -2,7 +2,7 @@ import json
 
 import codemind_lab.backends as backend_module
 import codemind_lab.engine as engine_module
-from codemind_lab.config import LabConfig, ModelSpec
+from codemind_lab.config import LabConfig
 from gama.models import ModelTier
 
 
@@ -43,7 +43,8 @@ def test_ollama_discovery_rejects_remote_http():
 
 class StubBackend:
     name = "stub"
-    last_usage = {"prompt_tokens": 5, "completion_tokens": 10}
+    def __init__(self):
+        self.last_usage = {"prompt_tokens": 5, "completion_tokens": 10}
 
     def complete(self, prompt, tier):
         assert tier is ModelTier.SMALL
