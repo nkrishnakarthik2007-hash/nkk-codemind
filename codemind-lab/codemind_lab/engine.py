@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from gama.abmcts import ABMCTSBackend
-from gama.backends import EnsembleBackend, GamaBackend
+from gama.backends import EnsembleBackend, GamaBackend\nfrom gama.meshflow import MeshflowBackend\nfrom gama.abmcts import ABMCTSBackend
 from gama.benchmark import SUITES, run_bench, summarize
 from gama.config import build_backend
 from gama.meshflow import MeshflowBackend
