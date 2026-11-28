@@ -1,0 +1,28 @@
+name: CodeMind CPU Lab
+
+on:
+  pull_request:
+    paths:
+      - "codemind-lab/**"
+      - ".github/workflows/codemind-lab.yml"
+  push:
+    branches: [main]
+    paths:
+      - "codemind-lab/**"
+      - ".github/workflows/codemind-lab.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install lab and test tools
+        run: python -m pip install -e "codemind-lab/.[dev]"
+      - name: Lint lab
+        run: ruff check codemind-lab
+      - name: Test lab
+        run: pytest codemind-lab/tests -q
