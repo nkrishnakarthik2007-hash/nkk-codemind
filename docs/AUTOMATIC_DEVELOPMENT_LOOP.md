@@ -4,7 +4,7 @@ This document defines the intended DroidBox-style workflow for CodeMind. It is a
 
 ## Current state
 
-CodeMind is currently a Python CLI prototype. It can inspect a workspace, select bounded source context, retrieve saved knowledge, call local Ollama or an explicitly selected OpenAI-compatible provider, and write local rotating JSONL diagnostics. `codemind diagnostics --output codemind-support.zip` exports a support bundle containing the app manifest and rotated logs.
+CodeMind is currently a Python CLI prototype. It can inspect a workspace, select bounded source context, retrieve saved knowledge, call local Ollama or an explicitly selected OpenAI-compatible provider, and write local rotating JSONL diagnostics. It can now ask a model for a bounded unified-diff proposal with `codemind propose`, validate and save it locally, then preview/apply it with `codemind apply-patch` (writing requires the explicit `--apply` flag). It still does not execute project commands or tests automatically. `codemind diagnostics --output codemind-support.zip` exports a support bundle containing the app manifest and rotated logs.
 
 The local diagnostics foundation and an explicit private-repository upload command are implemented. Upload is user-triggered, not automatic on every error. CodeMind does not yet have a GitHub-connected coding agent, desktop shell, or installed-app updater.
 
@@ -78,7 +78,9 @@ A commit is a source-code change, not automatically a safe app release. Every ch
 
 1. **Done (initial foundation):** add structured rotating diagnostics, common-secret redaction, and a local support ZIP export to the Python engine.
 2. **Done (explicit prototype path):** add private-repository validation, opt-in ZIP upload and GitHub issue creation using a narrowly scoped fine-grained token. Next, replace the environment-token setup with GitHub device authorization and Windows Credential Manager, then trigger uploads automatically for actionable errors.
-3. Add a GitHub-assisted development workflow and branch/PR/CI checks.
-4. Build the Windows desktop shell and secure settings/credential storage.
-5. Package the app and integrate the updater.
-6. Test update, rollback, crash recovery and preservation of existing user data on Windows.
+3. **Partially done:** add AI-generated unified-diff proposals, local validation, preview and explicit apply. The model does not write directly to the workspace.
+4. Add a GitHub-assisted development workflow and branch/PR/CI checks.
+5. Add permission-controlled test/formatter execution and the bounded repair loop.
+6. Build the Windows desktop shell and secure settings/credential storage.
+7. Package the app and integrate the updater.
+8. Test update, rollback, crash recovery and preservation of existing user data on Windows.
