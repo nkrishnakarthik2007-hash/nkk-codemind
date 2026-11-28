@@ -2,7 +2,6 @@ from gama.backends import ModelBackend
 from gama.models import ModelTier
 
 import codemind_lab.backends as backend_module
-import codemind_lab.engine as engine_module
 from codemind_lab.config import LabConfig
 
 
@@ -22,12 +21,12 @@ def test_router_dispatches_to_task_specific_backend(monkeypatch):
     coding = StubBackend("coding")
     general = StubBackend("general")
     monkeypatch.setattr(
-        engine_module,
+        backend_module,
         "build_backends",
         lambda config: ({"coding": coding, "general": general}, object()),
     )
 
-    router = engine_module.build_router(LabConfig(models=()), {"code_implementation": "coding"})
+    router = backend_module.build_router(LabConfig(models=()), {"code_implementation": "coding"})
     assert router.complete("write code", ModelTier.SMALL, task_type="code_implementation") == (
         "coding:write code"
     )
