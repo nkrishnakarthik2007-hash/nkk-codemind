@@ -8,8 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from .backends import list_ollama_models
 from .config import load_config
-from .engine import ask, benchmark, combine, develop_pipeline
+from .engine import ask, benchmark, combine, develop_pipeline, profile_models
 
 
 def parser() -> argparse.ArgumentParser:
@@ -21,6 +22,12 @@ def parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
 
     sub.add_parser("models", help="List configured model endpoints")
+    sub.add_parser("discover", help="Discover models downloaded in configured Ollama servers")
+
+    profile = sub.add_parser("profile", help="Measure real model latency and token throughput")
+    profile.add_argument("--models", required=True, help="Comma-separated configured model names")
+    profile.add_argument("--repeats", type=int, default=2)
+    profile.add_argument("prompt", nargs="?", default="Return exactly: CODEMIND_PROFILE_OK")
 
     pull = sub.add_parser("pull", help="Download a configured Ollama model")
     pull.add_argument("--model", required=True, help="Configured model name from models.json")
@@ -71,6 +78,29 @@ def main(argv: list[str] | None = None) -> int:
                 f"ensemble members, {config.cpu_threads} CPU threads, "
                 f"{config.reserve_ram_gb:.1f} GB RAM reserve."
             )
+            return 0
+        if args.command == "discover":
+            ollama_specs = [item for item in config.models if item.backend.lower() == "ollama"]
+            if not ollama_specs:
+                raise ValueError("No Ollama endpoints are configured in models.json.")
+            seen_urls = set()
+            configured_ids = {item.model for item in ollama_specs}
+            for spec in ollama_specs:
+                if spec.base_url in seen_urls:
+                    continue
+                seen_urls.add(spec.base_url)
+                print(f"Ollama server: {spec.base_url}")
+                for item in list_ollama_models(spec.base_url, config.request_timeout_seconds):
+                    model_id = item.get("name", "unknown")
+                    size = item.get("size")
+                    size_text = f" | file size={size / (1024 ** 3):.2f} GB" if isinstance(size, (int, float)) else ""
+                    status = "configured" if model_id in configured_ids else "not configured"
+                    print(f"  {model_id} | {status}{size_text}")
+            return 0
+        if args.command == "profile":
+            names = [x.strip() for x in args.models.split(",") if x.strip()]
+            result = profile_models(config, names, args.prompt, args.repeats)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         if args.command == "pull":
             spec = next((item for item in config.models if item.name == args.model), None)
