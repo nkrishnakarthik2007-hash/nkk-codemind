@@ -1,0 +1,40 @@
+{
+  "policy": {
+    "reserve_ram_gb": 1.5,
+    "max_parallel_calls": 1,
+    "max_ensemble_members": 2,
+    "request_timeout_seconds": 180
+  },
+  "models": [
+    {
+      "name": "qwen-coder-small",
+      "backend": "ollama",
+      "model": "qwen2.5-coder:0.5b",
+      "base_url": "http://127.0.0.1:11434",
+      "estimated_ram_gb": 1.0,
+      "context_tokens": 2048,
+      "max_output_tokens": 512,
+      "unload_after_call": true
+    },
+    {
+      "name": "qwen-coder-1.5b",
+      "backend": "ollama",
+      "model": "qwen2.5-coder:1.5b",
+      "base_url": "http://127.0.0.1:11434",
+      "estimated_ram_gb": 2.0,
+      "context_tokens": 2048,
+      "max_output_tokens": 768,
+      "unload_after_call": true
+    },
+    {
+      "name": "lmstudio-local",
+      "backend": "openai",
+      "model": "YOUR_LM_STUDIO_MODEL_ID",
+      "base_url": "http://127.0.0.1:1234/v1",
+      "estimated_ram_gb": null,
+      "context_tokens": 2048,
+      "max_output_tokens": 512,
+      "unload_after_call": false
+    }
+  ]
+}
