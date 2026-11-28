@@ -17,6 +17,15 @@ from pathlib import Path, PurePosixPath
 MAX_PATCH_BYTES = 2 * 1024 * 1024
 MAX_FILES_PER_PATCH = 20
 MAX_FILE_BYTES = 1_000_000
+BLOCKED_PATH_PARTS = {
+    ".git", ".ssh", ".aws", ".azure", ".gnupg", ".kube",
+    ".venv", "venv", "node_modules", "__pycache__",
+}
+BLOCKED_FILE_NAMES = {
+    ".env", ".npmrc", ".pypirc", "credentials.json", "secrets.json",
+    "id_rsa", "id_ed25519",
+}
+BLOCKED_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".keystore"}
 _HUNK_HEADER = re.compile(
     r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(?: .*)?$"
 )
@@ -97,7 +106,7 @@ def _parse_file_patches(patch_text: str) -> list[tuple[str, list[tuple[int, int,
                 break
             match = _HUNK_HEADER.match(header)
             if not match:
-                if header.startswith(("\\ No newline at end of file",)):
+                if header.startswith("\\ No newline at end of file"):
                     raise PatchError("Patches without a final newline are not supported yet.")
                 if header.startswith(("GIT binary patch", "Binary files ")):
                     raise PatchError("Binary patches are not supported.")
@@ -157,6 +166,11 @@ def _resolve_workspace_file(root: Path, relative: str) -> Path:
 
     candidate = workspace
     parts = PurePosixPath(relative).parts
+    if any(part.lower() in BLOCKED_PATH_PARTS for part in parts):
+        raise PatchError(f"Sensitive or generated directories cannot be patch targets: {relative}")
+    filename = parts[-1].lower()
+    if filename in BLOCKED_FILE_NAMES or filename.startswith(".env.") or Path(filename).suffix in BLOCKED_SUFFIXES:
+        raise PatchError(f"Sensitive files cannot be patch targets: {relative}")
     for part in parts:
         candidate = candidate / part
         if candidate.is_symlink():
