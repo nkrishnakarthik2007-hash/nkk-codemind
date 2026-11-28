@@ -23,6 +23,8 @@ It aims to make useful AI-assisted software development available on CPU-only co
 Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, and now writes local rotating diagnostics, exports privacy-safe support bundles, and can upload a bundle to a verified private GitHub repository when explicitly requested. It is **not yet** a full autonomous coding agent, automatic error uploader, or Windows desktop application.
 
 See:
+- [CPU-first CodeMind Lab](codemind-lab/README.md) — GAMA-based small-model composition and 6 GB CPU profile
+- [MODEL_FIRST_BLUEPRINT.md](MODEL_FIRST_BLUEPRINT.md) — model-first product architecture
 - [VISION.md](VISION.md) — product principles and boundaries
 - [ARCHITECTURE.md](ARCHITECTURE.md) — proposed technical design
 - [ROADMAP.md](ROADMAP.md) — staged implementation plan
