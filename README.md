@@ -20,7 +20,7 @@ It aims to make useful AI-assisted software development available on CPU-only co
 
 ## Status
 
-Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, and now writes local rotating diagnostics, exports privacy-safe support bundles, and can upload a bundle to a verified private GitHub repository when explicitly requested. It is **not yet** a full autonomous coding agent, automatic error uploader, or Windows desktop application.
+Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, propose validated code patches, preview them, and apply them only after explicit approval. It also writes local rotating diagnostics, exports privacy-safe support bundles, and can upload a bundle to a verified private GitHub repository when explicitly requested. It is **not yet** a full autonomous test-and-repair agent, automatic error uploader, or Windows desktop application.
 
 See:
 - [VISION.md](VISION.md) — product principles and boundaries
@@ -82,7 +82,27 @@ Ask the local model. CodeMind retrieves relevant saved excerpts and, when `--wor
 python -m codemind ask "Find the login bug and suggest a fix" --model qwen2.5-coder:1.5b --workspace .\my-project
 ```
 
-The current workspace integration is **read-only context selection**. It does not edit files or run commands yet.
+The `ask --workspace` integration is **read-only context selection**. A separate, guarded patch command is now available for proposed unified diffs. It previews exact changes by default and writes nothing unless you pass `--apply`. The first version only edits existing UTF-8 text files inside the selected workspace; it rejects traversal, symlinks, file creation/deletion and stale patch context. It does not yet let the model autonomously edit files or run project commands.
+
+Ask a local model to propose a patch. This reads only selected project snippets and saves a validated proposal under `%USERPROFILE%\.codemind\proposals`; it does not modify project files:
+
+```powershell
+python -m codemind propose "Improve the login error handling" --workspace .\my-project --model qwen2.5-coder:1.5b
+```
+
+Preview a proposed patch:
+
+```powershell
+python -m codemind apply-patch .\change.patch --workspace .\my-project
+```
+
+Apply it after reviewing the preview:
+
+```powershell
+python -m codemind apply-patch .\change.patch --workspace .\my-project --apply
+```
+
+See [SAFE_PATCHING.md](docs/SAFE_PATCHING.md) for supported patch format and safety limits.
 
 ```powershell
 python -m codemind ask "How do I read JSON from a file in Python?" --model qwen2.5-coder:1.5b
@@ -106,10 +126,10 @@ Provider model IDs, free-tier availability and quotas depend on the provider. Se
 Create a support bundle containing operational logs and app metadata (not project source files or prompts):
 
 ```powershell
-python -m codemind diagnostics --output .\\codemind-support.zip
+python -m codemind diagnostics --output .\codemind-support.zip
 ```
 
-Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\\.codemind\\logs` by default. To explicitly upload the bundle to a private GitHub repository, create a fine-grained token with **Contents: Read and write** and **Issues: Read and write** for that private repository, then set it only for the current PowerShell session:
+Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\.codemind\logs` by default. To explicitly upload the bundle to a private GitHub repository, create a fine-grained token with **Contents: Read and write** and **Issues: Read and write** for that private repository, then set it only for the current PowerShell session:
 
 ```powershell
 $secureToken = Read-Host 'GitHub token' -AsSecureString
