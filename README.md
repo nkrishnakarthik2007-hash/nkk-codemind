@@ -87,13 +87,13 @@ The `ask --workspace` integration is **read-only context selection**. A separate
 Preview a proposed patch:
 
 ```powershell
-python -m codemind apply-patch .\\change.patch --workspace .\\my-project
+python -m codemind apply-patch .\change.patch --workspace .\my-project
 ```
 
 Apply it after reviewing the preview:
 
 ```powershell
-python -m codemind apply-patch .\\change.patch --workspace .\\my-project --apply
+python -m codemind apply-patch .\change.patch --workspace .\my-project --apply
 ```
 
 See [SAFE_PATCHING.md](docs/SAFE_PATCHING.md) for supported patch format and safety limits.
@@ -120,10 +120,10 @@ Provider model IDs, free-tier availability and quotas depend on the provider. Se
 Create a support bundle containing operational logs and app metadata (not project source files or prompts):
 
 ```powershell
-python -m codemind diagnostics --output .\\codemind-support.zip
+python -m codemind diagnostics --output .\codemind-support.zip
 ```
 
-Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\\.codemind\\logs` by default. To explicitly upload the bundle to a private GitHub repository, create a fine-grained token with **Contents: Read and write** and **Issues: Read and write** for that private repository, then set it only for the current PowerShell session:
+Review the ZIP before sharing it. Logs are stored locally under `%USERPROFILE%\.codemind\logs` by default. To explicitly upload the bundle to a private GitHub repository, create a fine-grained token with **Contents: Read and write** and **Issues: Read and write** for that private repository, then set it only for the current PowerShell session:
 
 ```powershell
 $secureToken = Read-Host 'GitHub token' -AsSecureString
