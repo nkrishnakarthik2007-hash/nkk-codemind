@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import subprocess
 from pathlib import Path
 
 from .config import load_config
@@ -20,6 +21,9 @@ def parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
 
     sub.add_parser("models", help="List configured model endpoints")
+
+    pull = sub.add_parser("pull", help="Download a configured Ollama model")
+    pull.add_argument("--model", required=True, help="Configured model name from models.json")
 
     one = sub.add_parser("ask", help="Send a prompt to one configured model")
     one.add_argument("--model", required=True)
@@ -67,6 +71,14 @@ def main(argv: list[str] | None = None) -> int:
                 f"ensemble members, {config.reserve_ram_gb:.1f} GB RAM reserve."
             )
             return 0
+        if args.command == "pull":
+            spec = next((item for item in config.models if item.name == args.model), None)
+            if spec is None:
+                raise ValueError(f"Unknown configured model {args.model!r}.")
+            if spec.backend.lower() != "ollama":
+                raise ValueError("The pull command currently supports Ollama models only.")
+            print(f"Downloading {spec.model} into Ollama's model cache...")
+            return subprocess.run(["ollama", "pull", spec.model], check=False).returncode
         if args.command == "ask":
             print(ask(config, args.model, args.prompt, args.task_type))
             return 0
