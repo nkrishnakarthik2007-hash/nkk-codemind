@@ -1,6 +1,16 @@
 # Safe Patch Application
 
-CodeMind can validate and preview a unified diff before applying it to a project.
+CodeMind can ask a local AI model to propose a unified diff, validate it against a selected project, and preview it before applying. The model never writes directly to project files. A proposal is saved under `%USERPROFILE%\\.codemind\\proposals` (or `CODEMIND_HOME\\proposals` when configured).
+
+## Ask the model for a proposal
+
+```powershell
+python -m codemind propose "Improve the login error handling" --workspace .\\my-project --model qwen2.5-coder:1.5b
+```
+
+Hosted inference is available only when explicitly selected with `--provider openai-compatible`; selected source snippets and the task are then sent to the configured HTTPS provider. Local Ollama remains the default.
+
+The proposal command validates the model's diff and prints a preview. If the diff is malformed, unsafe, stale or targets files outside the supported scope, it is rejected and not saved.
 
 ## Preview first
 
