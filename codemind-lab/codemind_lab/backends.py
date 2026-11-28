@@ -10,7 +10,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
 
-from gama.backends import ModelBackend
+from gama.backends import EnsembleBackend, GamaBackend, ModelBackend
 from gama.models import ModelTier
 
 from .config import LabConfig, ModelSpec, check_memory_budget
