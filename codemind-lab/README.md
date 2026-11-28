@@ -29,7 +29,7 @@ CPU inference still consumes RAM. The initial policy is deliberately conservativ
 - Optional user-supplied estimated runtime RAM per model. The estimate includes weights, KV cache and runtime overhead; file size alone is not sufficient.
 - OpenAI-compatible endpoints (LM Studio / llama.cpp) are serialized, but the server may keep its model loaded. CodeMind cannot promise unload unless that runtime exposes and we implement its lifecycle API.
 
-The 6 GB target is a test profile, not a guarantee. The included `models.6gb.example.json` starts with one 0.5B coding model, 1,024-token context, three CPU threads and a 1.2 GB reserve. Windows, drivers and background apps use memory too. Measure actual free RAM, process RSS and response speed before adding another model.
+The 6 GB target is a test profile, not a guarantee. The included `models.6gb.example.json` starts with two complementary tiny models (Qwen3 0.6B and Qwen2.5-Coder 0.5B), each used sequentially, with 1,024-token context, three CPU threads and a 1.2 GB reserve. The listed 1.2 GB runtime estimates are conservative starting values, not measured results. Windows, drivers and background apps use memory too. Measure actual free RAM, process RSS and response speed.
 
 ## Install
 
@@ -73,7 +73,7 @@ codemind-lab --config models.json ask --model qwen-coder-small "Write a Python f
 codemind-lab --config models.json combine --models qwen-coder-small,qwen-coder-1.5b "Find a robust approach to parse a CSV file."
 ```
 
-GAMA runs the ensemble members sequentially and then asks the aggregator to synthesize. This is not a neural-weight merge; it is inference-time collaboration. It may improve some tasks and hurt others, so benchmark it.
+GAMA runs the ensemble members sequentially and then asks the final member to synthesize. In the 6 GB profile, Qwen3 0.6B plans/reasons first and Qwen2.5-Coder 0.5B is the final synthesizer. This is not a neural-weight merge; it is inference-time collaboration. It may improve some tasks and hurt others, so benchmark it.
 
 ## Sequential coding pipeline
 
