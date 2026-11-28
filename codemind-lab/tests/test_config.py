@@ -1,4 +1,4 @@
-from codemind_lab.config import LabConfig, ModelSpec, check_memory_budget, load_config
+from codemind_lab.config import ModelSpec, check_memory_budget, load_config
 
 
 def test_config_enforces_single_active_call(tmp_path):
