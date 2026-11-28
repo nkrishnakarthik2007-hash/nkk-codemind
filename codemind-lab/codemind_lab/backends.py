@@ -8,6 +8,7 @@ import threading
 import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from urllib.parse import urlparse
 
 from gama.backends import ModelBackend
 from gama.models import ModelTier
@@ -44,6 +45,14 @@ class OllamaNativeBackend(ModelBackend):
         self.spec = spec
         self.guard = guard
         self.timeout = timeout
+        parsed = urlparse(spec.base_url)
+        local_hosts = {"localhost", "127.0.0.1", "::1"}
+        if not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("Provider URL must have a host and no embedded credentials.")
+        if parsed.scheme != "https" and parsed.hostname not in local_hosts:
+            raise ValueError("Non-local OpenAI-compatible endpoints must use HTTPS.")
+        if parsed.scheme not in {"http", "https"}:
+            raise ValueError("Provider URL must use HTTP or HTTPS.")
         self.available = True
         self.last_usage = None
         self.last_finish_reason = None
@@ -66,6 +75,7 @@ class OllamaNativeBackend(ModelBackend):
                 "keep_alive": 0 if self.spec.unload_after_call else "5m",
                 "options": {
                     "num_ctx": self.spec.context_tokens,
+                    "num_thread": self.guard.config.cpu_threads,
                     "num_predict": min(
                         self.spec.max_output_tokens,
                         int(kwargs.get("max_tokens", self.spec.max_output_tokens)),
