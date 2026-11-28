@@ -68,7 +68,8 @@ def main(argv: list[str] | None = None) -> int:
                 )
             print(
                 f"CPU policy: one active call, max {config.max_ensemble_members} "
-                f"ensemble members, {config.reserve_ram_gb:.1f} GB RAM reserve."
+                f"ensemble members, {config.cpu_threads} CPU threads, "
+                f"{config.reserve_ram_gb:.1f} GB RAM reserve."
             )
             return 0
         if args.command == "pull":
