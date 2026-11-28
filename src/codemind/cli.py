@@ -17,6 +17,7 @@ from .knowledge.library import KnowledgeLibrary
 from .providers.ollama import OllamaError, OllamaProvider
 from .providers.openai_compatible import CloudProviderError, OpenAICompatibleProvider
 from .workspace import inspect_workspace, select_relevant_files
+from .model_lab import CANDIDATES, benchmark_models, save_benchmark_report
 
 
 def _tags(value: str) -> tuple[str, ...]:
@@ -58,6 +59,17 @@ def build_parser() -> argparse.ArgumentParser:
     models = sub.add_parser("models", help="List models already installed in local Ollama")
     models.add_argument("--host", help="Ollama URL (default: http://127.0.0.1:11434)")
 
+    candidates = sub.add_parser("model-candidates", help="Show CPU-first model candidates")
+    candidates.add_argument("--host", help="Ollama URL (default: http://127.0.0.1:11434)")
+    candidates.add_argument("--pull", help="Explicitly download one Ollama model tag")
+
+    benchmark = sub.add_parser("benchmark", help="Benchmark installed local models sequentially")
+    benchmark.add_argument("--models", nargs="+", required=True, help="Installed Ollama model tags")
+    benchmark.add_argument("--host", help="Ollama URL (default: http://127.0.0.1:11434)")
+    benchmark.add_argument("--output", type=Path, default=Path("codemind-model-benchmark.json"))
+    benchmark.add_argument("--num-ctx", type=int, default=1024)
+    benchmark.add_argument("--num-predict", type=int, default=160)
+
     inspect = sub.add_parser("inspect", help="Summarize languages, frameworks and files in a project")
     inspect.add_argument("path", type=Path)
 
@@ -94,6 +106,28 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Files indexed: {summary.file_count}")
             print("Languages: " + (", ".join(summary.languages) or "not detected"))
             print("Frameworks: " + (", ".join(summary.frameworks) or "not detected"))
+            return 0
+        if args.command == "model-candidates":
+            if args.pull:
+                provider = OllamaProvider(host=args.host)
+                print(f"Downloading {args.pull}: {provider.pull_model(args.pull)}")
+                return 0
+            for item in CANDIDATES:
+                print(f"{item.tag:22} | {item.size_class:6} | {item.roles} | {item.license_note}")
+            print("\\nPull a selected model explicitly with --pull MODEL_TAG.")
+            return 0
+        if args.command == "benchmark":
+            provider = OllamaProvider(host=args.host)
+            installed = {item.name for item in provider.list_models()}
+            missing = [name for name in args.models if name not in installed]
+            if missing:
+                raise ValueError("Models not installed in Ollama: " + ", ".join(missing))
+            report = benchmark_models(provider, args.models, num_ctx=args.num_ctx, num_predict=args.num_predict)
+            save_benchmark_report(report, args.output)
+            for row in report["results"]:
+                print("{} | {} | {:.2f} tok/s | {:.2f}s".format(row["model"], row["task"], row["tokens_per_second"], row["duration_seconds"]))
+            print("\\nSaved: " + str(args.output))
+            print("Review raw outputs and run tests; speed is not a quality score.")
             return 0
         if args.command == "models":
             provider = OllamaProvider(host=args.host)
