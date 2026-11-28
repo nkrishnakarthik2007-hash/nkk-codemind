@@ -1,8 +1,7 @@
-from gama.backends import ModelBackend
-from gama.models import ModelTier
-
 import codemind_lab.backends as backend_module
 from codemind_lab.config import LabConfig
+from gama.backends import ModelBackend
+from gama.models import ModelTier
 
 
 class StubBackend(ModelBackend):
