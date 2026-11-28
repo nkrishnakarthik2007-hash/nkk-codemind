@@ -43,8 +43,8 @@ CodeMind validates the patch again and checks that each target file has not chan
 
 ## Next steps
 
-1. Add a Git-aware diff and user-controlled rollback view.
-2. Let the model propose a patch in a structured, bounded format.
-3. Require user approval before applying model-generated changes.
-4. Add command allowlists and explicit per-project test/formatter permissions.
-5. Build the bounded inspect → plan → edit → test → repair → verify loop.
+1. Add a Git-aware diff, staged review and user-controlled rollback view.
+2. Add per-file approval and a clearer patch review experience.
+3. Add command allowlists and explicit per-project test/formatter permissions.
+4. Build the bounded inspect → plan → edit → test → repair → verify loop.
+5. Add the Windows desktop workspace after the core engine is reliable.
