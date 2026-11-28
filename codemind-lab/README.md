@@ -78,7 +78,7 @@ This queries each configured Ollama server's `/api/tags` endpoint and shows whic
 ## Measure real model performance
 
 ```powershell
-codemind-lab --config models.json profile --models qwen-general,qwen-coder-small --repeats 2
+codemind-lab --config models.json profile --models qwen3-small,qwen-coder-0.5b --repeats 2
 ```
 
 The profile runs a short prompt against each selected model sequentially and records response time, provider-reported prompt/output token counts, output tokens per second, and system-wide free-RAM snapshots before and after each request. The free-RAM values are not peak process RAM and can be affected by Windows and other applications. Use repeated runs and compare the same prompt/context settings.
