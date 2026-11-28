@@ -7,13 +7,15 @@ import json
 import sys
 from pathlib import Path
 
-from .backends import build_backends
 from .config import load_config
 from .engine import ask, benchmark, combine, develop_pipeline
 
 
 def parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="codemind-lab", description="NKK CodeMind CPU-first model lab")
+    p = argparse.ArgumentParser(
+        prog="codemind-lab",
+        description="NKK CodeMind CPU-first model lab",
+    )
     p.add_argument("--config", type=Path, default=Path("models.json"))
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -37,6 +39,11 @@ def parser() -> argparse.ArgumentParser:
     bench = sub.add_parser("bench", help="Run GAMA deterministic benchmark suite")
     bench.add_argument("--models", required=True, help="Comma-separated configured model names")
     bench.add_argument("--suite", default="qadeep", choices=["qadeep"])
+    bench.add_argument(
+        "--strategy",
+        default="single",
+        choices=["single", "ensemble", "meshflow", "abmcts"],
+    )
     bench.add_argument("--repeats", type=int, default=1)
     return p
 
@@ -47,14 +54,17 @@ def main(argv: list[str] | None = None) -> int:
         config = load_config(args.config)
         if args.command == "models":
             for item in config.models:
+                estimated = (
+                    f"{item.estimated_ram_gb:.2f} GB"
+                    if item.estimated_ram_gb is not None else "not configured"
+                )
                 print(
                     f"{item.name}: {item.backend} | {item.model} | {item.base_url} | "
-                    f"context={item.context_tokens} | estimated RAM="
-                    f"{item.estimated_ram_gb if item.estimated_ram_gb is not None else 'not set'} GB"
+                    f"context={item.context_tokens} | estimated runtime RAM={estimated}"
                 )
             print(
-                f"CPU policy: one active call, max {config.max_ensemble_members} ensemble members, "
-                f"{config.reserve_ram_gb:.1f} GB RAM reserve."
+                f"CPU policy: one active call, max {config.max_ensemble_members} "
+                f"ensemble members, {config.reserve_ram_gb:.1f} GB RAM reserve."
             )
             return 0
         if args.command == "ask":
@@ -72,7 +82,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "bench":
             names = [x.strip() for x in args.models.split(",") if x.strip()]
-            result = benchmark(config, names, args.suite, args.repeats, args.strategy)
+            result = benchmark(
+                config, names, args.suite, args.repeats, args.strategy
+            )
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         return 2
