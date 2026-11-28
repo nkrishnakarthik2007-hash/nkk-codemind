@@ -82,7 +82,21 @@ Ask the local model. CodeMind retrieves relevant saved excerpts and, when `--wor
 python -m codemind ask "Find the login bug and suggest a fix" --model qwen2.5-coder:1.5b --workspace .\my-project
 ```
 
-The current workspace integration is **read-only context selection**. It does not edit files or run commands yet.
+The `ask --workspace` integration is **read-only context selection**. A separate, guarded patch command is now available for proposed unified diffs. It previews exact changes by default and writes nothing unless you pass `--apply`. The first version only edits existing UTF-8 text files inside the selected workspace; it rejects traversal, symlinks, file creation/deletion and stale patch context. It does not yet let the model autonomously edit files or run project commands.
+
+Preview a proposed patch:
+
+```powershell
+python -m codemind apply-patch .\\change.patch --workspace .\\my-project
+```
+
+Apply it after reviewing the preview:
+
+```powershell
+python -m codemind apply-patch .\\change.patch --workspace .\\my-project --apply
+```
+
+See [SAFE_PATCHING.md](docs/SAFE_PATCHING.md) for supported patch format and safety limits.
 
 ```powershell
 python -m codemind ask "How do I read JSON from a file in Python?" --model qwen2.5-coder:1.5b
