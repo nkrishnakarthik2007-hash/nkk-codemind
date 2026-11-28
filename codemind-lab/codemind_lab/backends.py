@@ -236,9 +236,9 @@ def build_sequential_ensemble(config: LabConfig, member_names: list[str] | None 
     """Build GAMA's sequential Mixture-of-Agents composite under the CPU call lock."""
     backends, _ = build_backends(config)
     names = member_names or list(backends)[:config.max_ensemble_members]
-    if not 1 <= len(names) <= config.max_ensemble_members:
+    if not 2 <= len(names) <= config.max_ensemble_members:
         raise ValueError(
-            f"Choose between 1 and {config.max_ensemble_members} ensemble members."
+            f"Choose between 2 and {config.max_ensemble_members} ensemble members."
         )
     missing = [name for name in names if name not in backends]
     if missing:
