@@ -140,8 +140,8 @@ def main(argv: list[str] | None = None) -> int:
                 file_chars=args.file_chars,
             )
             for change in proposal.preview.changes:
-                print(change.diff, end="" if change.diff.endswith("\\n") else "\\n")
-            print(f"\\nValidated {proposal.preview.file_count} file(s).")
+                print(change.diff, end="" if change.diff.endswith("\n") else "\\n")
+            print(f"\nValidated {proposal.preview.file_count} file(s).")
             print(f"Proposal saved locally: {proposal.path}")
             print("No project files were changed. Review the diff, then use apply-patch with --apply.")
             record_event("patch_proposed", file_count=proposal.preview.file_count, provider=args.provider)
