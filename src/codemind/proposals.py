@@ -45,7 +45,7 @@ def extract_unified_diff(response: str) -> str:
         start = next(
             (
                 index for index, line in enumerate(lines)
-                if line.startswith("diff --git ") or line.startswith("--- a/")
+                if line.startswith(("diff --git ", "--- a/"))
             ),
             None,
         )
