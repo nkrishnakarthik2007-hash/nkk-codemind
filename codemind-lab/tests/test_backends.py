@@ -1,10 +1,8 @@
 import json
 
-from gama.models import ModelTier
-
-from codemind_lab.backends import OllamaNativeBackend, OpenAICompatibleBackend
+from codemind_lab.backends import CpuGuard, OllamaNativeBackend, OpenAICompatibleBackend
 from codemind_lab.config import LabConfig, ModelSpec
-from codemind_lab.backends import CpuGuard
+from gama.models import ModelTier
 
 
 class FakeResponse:
