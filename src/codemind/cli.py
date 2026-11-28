@@ -17,7 +17,7 @@ from .knowledge.library import KnowledgeLibrary
 from .providers.ollama import OllamaError, OllamaProvider
 from .providers.openai_compatible import CloudProviderError, OpenAICompatibleProvider
 from .workspace import inspect_workspace, select_relevant_files
-from .patching import PatchError, apply_patch, preview_patch
+from .patching import apply_patch, preview_patch
 
 
 def _tags(value: str) -> tuple[str, ...]:
@@ -108,8 +108,8 @@ def main(argv: list[str] | None = None) -> int:
             patch_text = args.patch_file.read_text(encoding="utf-8")
             preview = preview_patch(args.workspace, patch_text)
             for change in preview.changes:
-                print(change.diff, end="" if change.diff.endswith("\\n") else "\\n")
-            print(f"\\nValidated {preview.file_count} file(s).")
+                print(change.diff, end="" if change.diff.endswith("\n") else "\n")
+            print(f"\nValidated {preview.file_count} file(s).")
             if args.apply:
                 changed = apply_patch(args.workspace, preview)
                 print("Applied changes to: " + ", ".join(changed))
