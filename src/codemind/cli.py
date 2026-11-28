@@ -15,6 +15,7 @@ from .diagnostics import (
 from .knowledge.ingest import add_url
 from .knowledge.library import KnowledgeLibrary
 from .patching import apply_patch, preview_patch
+from .proposals import propose_patch
 from .providers.ollama import OllamaError, OllamaProvider
 from .providers.openai_compatible import CloudProviderError, OpenAICompatibleProvider
 from .workspace import inspect_workspace, select_relevant_files
@@ -62,6 +63,24 @@ def build_parser() -> argparse.ArgumentParser:
     inspect = sub.add_parser("inspect", help="Summarize languages, frameworks and files in a project")
     inspect.add_argument("path", type=Path)
 
+    propose = sub.add_parser(
+        "propose",
+        help="Ask an AI model to prepare a patch for review without changing project files",
+    )
+    propose.add_argument("task", help="Specific coding task to implement")
+    propose.add_argument("--workspace", type=Path, required=True, help="Project folder to inspect")
+    propose.add_argument("--model", required=True, help="Installed Ollama model or hosted model ID")
+    propose.add_argument(
+        "--provider", choices=("ollama", "openai-compatible"), default="ollama",
+        help="Local Ollama by default; hosted inference requires explicit selection",
+    )
+    propose.add_argument("--host", help="Ollama URL (default: http://127.0.0.1:11434)")
+    propose.add_argument("--base-url", help="Hosted provider base URL (default: OpenRouter API)")
+    propose.add_argument("--num-ctx", type=int, default=2048)
+    propose.add_argument("--num-predict", type=int, default=1024)
+    propose.add_argument("--max-files", type=int, default=4)
+    propose.add_argument("--file-chars", type=int, default=1800)
+
     patch = sub.add_parser(
         "apply-patch",
         help="Preview a unified diff; pass --apply to write validated changes",
@@ -99,6 +118,33 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"Uploaded to private GitHub diagnostics repository: {issue_url}")
                 record_event("diagnostics_uploaded", destination="private_github")
             record_event("diagnostics_bundle_created")
+            return 0
+        if args.command == "propose":
+            if args.provider == "openai-compatible":
+                print(
+                    "Hosted provider selected: task details and selected project snippets "
+                    "will be sent to the configured service.",
+                    file=sys.stderr,
+                )
+                provider = OpenAICompatibleProvider(base_url=args.base_url)
+            else:
+                provider = OllamaProvider(host=args.host)
+            proposal = propose_patch(
+                provider,
+                args.model,
+                args.task,
+                args.workspace,
+                num_ctx=args.num_ctx,
+                num_predict=args.num_predict,
+                max_files=args.max_files,
+                file_chars=args.file_chars,
+            )
+            for change in proposal.preview.changes:
+                print(change.diff, end="" if change.diff.endswith("\\n") else "\\n")
+            print(f"\\nValidated {proposal.preview.file_count} file(s).")
+            print(f"Proposal saved locally: {proposal.path}")
+            print("No project files were changed. Review the diff, then use apply-patch with --apply.")
+            record_event("patch_proposed", file_count=proposal.preview.file_count, provider=args.provider)
             return 0
         if args.command == "apply-patch":
             if not args.patch_file.is_file():
