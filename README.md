@@ -84,10 +84,10 @@ python -m codemind ask "Find the login bug and suggest a fix" --model qwen2.5-co
 
 The `ask --workspace` integration is **read-only context selection**. A separate, guarded patch command is now available for proposed unified diffs. It previews exact changes by default and writes nothing unless you pass `--apply`. The first version only edits existing UTF-8 text files inside the selected workspace; it rejects traversal, symlinks, file creation/deletion and stale patch context. It does not yet let the model autonomously edit files or run project commands.
 
-Ask a local model to propose a patch. This reads only selected project snippets and saves a validated proposal under `%USERPROFILE%\\.codemind\\proposals`; it does not modify project files:
+Ask a local model to propose a patch. This reads only selected project snippets and saves a validated proposal under `%USERPROFILE%\.codemind\proposals`; it does not modify project files:
 
 ```powershell
-python -m codemind propose "Improve the login error handling" --workspace .\\my-project --model qwen2.5-coder:1.5b
+python -m codemind propose "Improve the login error handling" --workspace .\my-project --model qwen2.5-coder:1.5b
 ```
 
 Preview a proposed patch:
