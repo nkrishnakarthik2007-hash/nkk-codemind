@@ -9,7 +9,7 @@ import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from gama.backends import ModelBackend, GamaBackend, EnsembleBackend
+from gama.backends import ModelBackend
 from gama.models import ModelTier
 
 from .config import LabConfig, ModelSpec, check_memory_budget
