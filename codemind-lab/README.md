@@ -29,7 +29,7 @@ CPU inference still consumes RAM. The initial policy is deliberately conservativ
 - Optional user-supplied estimated runtime RAM per model. The estimate includes weights, KV cache and runtime overhead; file size alone is not sufficient.
 - OpenAI-compatible endpoints (LM Studio / llama.cpp) are serialized, but the server may keep its model loaded. CodeMind cannot promise unload unless that runtime exposes and we implement its lifecycle API.
 
-The 6 GB target is a test profile, not a guarantee. Windows, drivers and background apps use memory too. Start with one small quantized model and measure actual free RAM, process RSS and response speed.
+The 6 GB target is a test profile, not a guarantee. The included `models.6gb.example.json` starts with one 0.5B coding model, 1,024-token context, three CPU threads and a 1.2 GB reserve. Windows, drivers and background apps use memory too. Measure actual free RAM, process RSS and response speed before adding another model.
 
 ## Install
 
@@ -40,7 +40,8 @@ cd codemind-lab
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-Copy-Item models.example.json models.json
+Copy-Item models.6gb.example.json models.json  # conservative 6 GB CPU profile
+# Or use models.example.json for a wider 16 GB-class candidate pool
 ```
 
 The package installs GAMA from its public Git repository. Internet access is required for this initial install. No model weights are automatically downloaded.
