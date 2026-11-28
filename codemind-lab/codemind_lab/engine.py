@@ -120,6 +120,11 @@ def benchmark(
             "model-generated code; add a separately reviewed OS sandbox before enabling them."
         )
     backends, _ = build_backends(config)
+    missing = [name for name in model_names if name not in backends]
+    if missing:
+        raise ValueError(f"Unknown model names: {', '.join(missing)}")
+    if not model_names:
+        raise ValueError("Select at least one model for benchmarking.")
     if strategy == "single":
         chosen = {name: backends[name] for name in model_names}
     elif strategy == "ensemble":
