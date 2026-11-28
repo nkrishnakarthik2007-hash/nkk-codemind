@@ -151,3 +151,16 @@ def test_rejects_secret_file_targets(tmp_path: Path):
 """
     with pytest.raises(PatchError, match="Sensitive files"):
         preview_patch(tmp_path, patch)
+
+
+def test_preserves_windows_crlf_line_endings(tmp_path: Path):
+    source = tmp_path / "app.py"
+    original = 'def greet():\\r\\n    return "hi"\\r\\n'
+    source.write_bytes(original.encode("utf-8"))
+
+    preview = preview_patch(tmp_path, SIMPLE_PATCH)
+    apply_patch(tmp_path, preview)
+
+    updated = source.read_bytes().decode("utf-8")
+    assert updated == 'def greet():\\r\\n    message = "hello"\\r\\n    return message\\r\\n'
+    assert "\\n" not in updated.replace("\\r\\n", "")
