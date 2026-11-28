@@ -6,6 +6,7 @@ validates and saves under the user's CodeMind data directory for separate review
 
 from __future__ import annotations
 
+import os
 import re
 import tempfile
 import uuid
@@ -15,6 +16,7 @@ from pathlib import Path
 
 from .knowledge.library import default_home
 from .patching import PatchError, PatchPreview, preview_patch
+from .providers.ollama import OllamaProvider
 from .workspace import inspect_workspace, select_relevant_files
 
 MAX_PROPOSAL_BYTES = 2 * 1024 * 1024
@@ -69,8 +71,6 @@ def _save_proposal(diff: str, home: Path | None = None) -> Path:
     )
     temporary = Path(temporary_name)
     try:
-        import os
-
         with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as handle:
             handle.write(diff)
             handle.flush()
@@ -142,7 +142,7 @@ def propose_patch(
         system=system,
         num_ctx=num_ctx,
         num_predict=num_predict,
-        **({"keep_alive": 0} if provider.__class__.__name__ == "OllamaProvider" else {}),
+        **({"keep_alive": 0} if isinstance(provider, OllamaProvider) else {}),
     )
     diff = extract_unified_diff(result.text)
     if len(diff.encode("utf-8")) > MAX_PROPOSAL_BYTES:
