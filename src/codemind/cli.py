@@ -14,10 +14,10 @@ from .diagnostics import (
 )
 from .knowledge.ingest import add_url
 from .knowledge.library import KnowledgeLibrary
+from .patching import apply_patch, preview_patch
 from .providers.ollama import OllamaError, OllamaProvider
 from .providers.openai_compatible import CloudProviderError, OpenAICompatibleProvider
 from .workspace import inspect_workspace, select_relevant_files
-from .patching import apply_patch, preview_patch
 
 
 def _tags(value: str) -> tuple[str, ...]:
