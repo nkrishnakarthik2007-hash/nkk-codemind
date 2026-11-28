@@ -109,7 +109,7 @@ def test_cli_preview_is_read_only_by_default(tmp_path: Path, monkeypatch, capsys
     from codemind.cli import main
 
     source = tmp_path / "app.py"
-    original = 'def greet():\\n    return "hi"\\n'
+    original = 'def greet():\n    return "hi"\n'
     source.write_text(original, encoding="utf-8")
     patch_file = tmp_path / "change.patch"
     patch_file.write_text(SIMPLE_PATCH, encoding="utf-8")
@@ -128,7 +128,7 @@ def test_cli_requires_apply_flag_to_write(tmp_path: Path, monkeypatch):
     from codemind.cli import main
 
     source = tmp_path / "app.py"
-    source.write_text('def greet():\\n    return "hi"\\n', encoding="utf-8")
+    source.write_text('def greet():\n    return "hi"\n', encoding="utf-8")
     patch_file = tmp_path / "change.patch"
     patch_file.write_text(SIMPLE_PATCH, encoding="utf-8")
     monkeypatch.setenv("CODEMIND_HOME", str(tmp_path / ".codemind"))
@@ -142,7 +142,7 @@ def test_cli_requires_apply_flag_to_write(tmp_path: Path, monkeypatch):
 
 
 def test_rejects_secret_file_targets(tmp_path: Path):
-    (tmp_path / ".env").write_text("TOKEN=not-for-patching\\n", encoding="utf-8")
+    (tmp_path / ".env").write_text("TOKEN=not-for-patching\n", encoding="utf-8")
     patch = """--- a/.env
 +++ b/.env
 @@ -1 +1 @@
