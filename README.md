@@ -20,7 +20,7 @@ It aims to make useful AI-assisted software development available on CPU-only co
 
 ## Status
 
-Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, and now writes local rotating diagnostics, exports privacy-safe support bundles, and can upload a bundle to a verified private GitHub repository when explicitly requested. It is **not yet** a full autonomous coding agent, automatic error uploader, or Windows desktop application.
+Early prototype. The CLI can store/search knowledge, query an installed local Ollama model, propose validated code patches, preview them, and apply them only after explicit approval. It also writes local rotating diagnostics, exports privacy-safe support bundles, and can upload a bundle to a verified private GitHub repository when explicitly requested. It is **not yet** a full autonomous test-and-repair agent, automatic error uploader, or Windows desktop application.
 
 See:
 - [VISION.md](VISION.md) — product principles and boundaries
