@@ -138,7 +138,7 @@ def test_cli_requires_apply_flag_to_write(tmp_path: Path, monkeypatch):
     ])
 
     assert exit_code == 0
-    assert "message = \\"hello\\"" in source.read_text(encoding="utf-8")
+    assert 'message = "hello"' in source.read_text(encoding="utf-8")
 
 
 def test_rejects_secret_file_targets(tmp_path: Path):
