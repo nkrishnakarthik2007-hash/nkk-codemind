@@ -6,7 +6,7 @@ on:
       - "codemind-lab/**"
       - ".github/workflows/codemind-lab.yml"
   push:
-    branches: [main]
+    branches: [main, "feature/cpu-first-codemind-lab"]
     paths:
       - "codemind-lab/**"
       - ".github/workflows/codemind-lab.yml"
