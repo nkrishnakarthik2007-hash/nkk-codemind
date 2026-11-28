@@ -197,15 +197,15 @@ def _apply_hunks(original: str, hunks: list[tuple[int, int, list[str], list[str]
         if start < cursor or start > len(source_lines):
             raise PatchError(f"Overlapping or out-of-range hunk in {path}.")
         actual = source_lines[start : start + old_count]
-        normalized_actual = [line.replace("\\r\\n", "\\n") for line in actual]
+        normalized_actual = [line.replace("\r\n", "\n") for line in actual]
         if normalized_actual != expected_old:
             raise PatchError(
                 f"Patch context does not match {path} at line {start + 1}; "
                 "the file may have changed since the patch was generated."
             )
-        newline = "\\r\\n" if "\\r\\n" in original else "\\n"
+        newline = "\r\n" if "\r\n" in original else "\n"
         normalized_replacement = [
-            line.replace("\\r\\n", "\\n").replace("\\n", newline)
+            line.replace("\r\n", "\n").replace("\n", newline)
             for line in replacement
         ]
         result.extend(source_lines[cursor:start])
