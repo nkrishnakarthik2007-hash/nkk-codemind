@@ -231,7 +231,7 @@ def build_sequential_ensemble(config: LabConfig, member_names: list[str] | None 
     return EnsembleBackend(
         members,
         strategy="synthesize",
-        aggregator=members[0],
+        aggregator=members[-1],
         aggregator_prompt=(
             "Compare the candidate solutions. Check for correctness, completeness and "
             "consistency with the original request. Return one improved final answer only."
