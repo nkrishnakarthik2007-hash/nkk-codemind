@@ -158,7 +158,8 @@ def test_preserves_windows_crlf_line_endings(tmp_path: Path):
     original = 'def greet():\r\n    return "hi"\r\n'
     source.write_bytes(original.encode("utf-8"))
 
-    preview = preview_patch(tmp_path, SIMPLE_PATCH)
+    windows_patch = SIMPLE_PATCH.replace("\n", "\r\n")
+    preview = preview_patch(tmp_path, windows_patch)
     apply_patch(tmp_path, preview)
 
     updated = source.read_bytes().decode("utf-8")
