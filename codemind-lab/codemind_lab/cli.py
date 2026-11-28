@@ -72,7 +72,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "bench":
             names = [x.strip() for x in args.models.split(",") if x.strip()]
-            result = benchmark(config, names, args.suite, args.repeats)
+            result = benchmark(config, names, args.suite, args.repeats, args.strategy)
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         return 2
