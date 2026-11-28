@@ -207,6 +207,35 @@ class OpenAICompatibleBackend(ModelBackend):
         return text
 
 
+
+def list_ollama_models(base_url: str, timeout: int = 10) -> list[dict]:
+    """Return locally available Ollama models from GET /api/tags."""
+    parsed = urlparse(base_url)
+    local_hosts = {"localhost", "127.0.0.1", "::1"}
+    if not parsed.hostname or parsed.username or parsed.password:
+        raise ValueError("Provider URL must have a host and no embedded credentials.")
+    if parsed.scheme != "https" and parsed.hostname not in local_hosts:
+        raise ValueError("Non-local Ollama endpoints must use HTTPS.")
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Provider URL must use HTTP or HTTPS.")
+    request = Request(f"{base_url.rstrip('/')}/api/tags")
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            raw = response.read(_MAX_RESPONSE_BYTES + 1)
+        if len(raw) > _MAX_RESPONSE_BYTES:
+            raise ProviderError("Ollama model list exceeded the 8 MB safety limit.")
+        data = json.loads(raw.decode("utf-8"))
+    except HTTPError as exc:
+        detail = exc.read(2000).decode("utf-8", errors="replace")
+        raise ProviderError(f"Ollama HTTP {exc.code}: {detail}") from exc
+    except (URLError, TimeoutError, OSError) as exc:
+        raise ProviderError(f"Cannot reach Ollama at {base_url}: {exc}") from exc
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ProviderError("Ollama returned invalid model-list JSON.") from exc
+    if not isinstance(data, dict) or not isinstance(data.get("models", []), list):
+        raise ProviderError("Ollama returned an unexpected model-list response.")
+    return [item for item in data["models"] if isinstance(item, dict)]
+
 def build_backends(config: LabConfig) -> tuple[dict[str, ModelBackend], CpuGuard]:
     guard = CpuGuard(config)
     result: dict[str, ModelBackend] = {}
