@@ -50,6 +50,7 @@ def test_ollama_backend_requests_unload_and_small_context(monkeypatch):
     assert seen["url"].endswith("/api/chat")
     assert seen["payload"]["keep_alive"] == 0
     assert seen["payload"]["options"]["num_ctx"] == 1024
+    assert seen["payload"]["options"]["num_thread"] == cfg.cpu_threads
     assert seen["payload"]["options"]["num_predict"] == 128
     assert backend.last_usage["completion_tokens"] == 4
 
