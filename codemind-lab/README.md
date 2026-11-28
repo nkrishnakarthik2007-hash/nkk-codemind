@@ -51,6 +51,10 @@ Edit `models.json`. Keep API keys out of the file; set the environment variable 
 Example first model:
 
 ```powershell
+# Download through CodeMind Lab (uses Ollama's model cache)
+codemind-lab --config models.json pull --model qwen-coder-small
+
+# Or use Ollama directly
 ollama pull qwen2.5-coder:0.5b
 ```
 
