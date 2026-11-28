@@ -25,7 +25,10 @@ def test_router_dispatches_to_task_specific_backend(monkeypatch):
         lambda config: ({"coding": coding, "general": general}, object()),
     )
 
-    router = backend_module.build_router(LabConfig(models=()), {"code_implementation": "coding"})
+    router = backend_module.build_router(
+        LabConfig(models=()),
+        {"code_implementation": "coding", "explanation": "general"},
+    )
     assert router.complete("write code", ModelTier.SMALL, task_type="code_implementation") == (
         "coding:write code"
     )
