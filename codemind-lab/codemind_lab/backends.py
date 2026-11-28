@@ -7,8 +7,8 @@ import os
 import threading
 import time
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 from gama.backends import EnsembleBackend, GamaBackend, ModelBackend
 from gama.models import ModelTier
